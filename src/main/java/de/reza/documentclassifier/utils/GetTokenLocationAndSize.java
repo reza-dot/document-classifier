@@ -1,5 +1,6 @@
 package de.reza.documentclassifier.utils;
 
+import de.reza.documentclassifier.pojo.Token;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
@@ -11,34 +12,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GetTokenLocationAndSize extends PDFTextStripper {
-    public GetTokenLocationAndSize() throws IOException {
+
+    private List<Token> tokenList;
+
+    public GetTokenLocationAndSize(List<Token> tokenList) throws IOException {
+        this.tokenList = tokenList;
     }
 
 
     @Override
-    protected void writeString(String string, List<TextPosition> textPositions) throws IOException {
+    protected void writeString(String string, List<TextPosition> textPositions){
         String wordSeparator = getWordSeparator();
         List<TextPosition> word = new ArrayList<>();
         for (TextPosition text : textPositions) {
             String thisChar = text.getUnicode();
-            if (thisChar != null) {
-                if (thisChar.length() >= 1) {
-                    if (!thisChar.equals(wordSeparator)) {
-                        word.add(text);
-                    } else if (!word.isEmpty()) {
-                        printWord(word);
-                        word.clear();
-                    }
-                }
+            if (thisChar != null && thisChar.length() >= 1 && !thisChar.equals(wordSeparator)) {
+                word.add(text);
+            } else if (!word.isEmpty()) {
+                getTokenBoundingBox(word);
+                word.clear();
             }
         }
         if (!word.isEmpty()) {
-            printWord(word);
+            getTokenBoundingBox(word);
             word.clear();
         }
     }
 
-    void printWord(List<TextPosition> word) {
+    void getTokenBoundingBox(List<TextPosition> word) {
         Rectangle2D boundingBox = null;
         StringBuilder token = new StringBuilder();
         for (TextPosition text : word) {
@@ -49,8 +50,12 @@ public class GetTokenLocationAndSize extends PDFTextStripper {
                 boundingBox.add(box);
             token.append(text.getUnicode());
         }
+
         System.out.println("<"+ token + ">" + " [(X=" + round(boundingBox.getX()) + ",Y=" +  round(boundingBox.getY())
                 + ") height=" +  round(boundingBox.getHeight()) + " width=" +  round(boundingBox.getWidth()) + "]");
+
+
+        tokenList.add(new Token(token.toString(), round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth())));
     }
 
     protected double round(double round){

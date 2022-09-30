@@ -14,14 +14,9 @@ COPY . ./
 RUN ./mvnw package
 
 # Second (and final) stage starts here. All intermediate stages are deleted after build.
-# As of 2022-03-22 Alpine images crash instantly due to a segmentation fault.
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 RUN apt-get update
-#RUN apt-get -q -y install software-properties-common
-#RUN apt-get -q -y install libleptonica-dev
-#RUN apt-get -q -y install libtesseract3
-#RUN apt-get -q -y install libtesseract-dev
 RUN apt-get -y install tesseract-ocr
 
 # Download last language package
