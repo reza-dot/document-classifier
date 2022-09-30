@@ -1,10 +1,10 @@
 package de.reza.documentclassifier.utils;
 
 import de.reza.documentclassifier.pojo.Token;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.*;
 
@@ -21,7 +21,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -29,7 +28,7 @@ public class XmlProcessor {
 
 
 
-    public void generateTokenXmlFile(Map<Token, Long> map, String uuid, int numberOfDocuments) {
+    public void generateTokenXmlFile(List<Token> tokenList, String trainingFiles, String fileName) {
 
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -39,28 +38,27 @@ public class XmlProcessor {
             Element tokens = document.createElement("tokenList");
             document.appendChild(tokens);
 
-            for (Map.Entry<Token, Long> entry : map.entrySet()) {
+            for (Token token : tokenList) {
 
-                if (entry.getValue() >= numberOfDocuments * 0.95) {
                     Element element = document.createElement("token");
                     tokens.appendChild(element);
 
                     Element tokenKey = document.createElement("tokenKey");
-                    tokenKey.appendChild(document.createTextNode(entry.getKey().getTokeName()));
+                    tokenKey.appendChild(document.createTextNode(token.getTokeName()));
                     element.appendChild(tokenKey);
 
                     Element xAxis = document.createElement("xAxis");
-                    xAxis.appendChild(document.createTextNode(String.valueOf(entry.getKey().getXAxis())));
+                    xAxis.appendChild(document.createTextNode(String.valueOf(token.getXAxis())));
                     element.appendChild(xAxis);
 
                     Element yAxis = document.createElement("yAxis");
-                    yAxis.appendChild(document.createTextNode(String.valueOf(entry.getKey().getYAxis())));
+                    yAxis.appendChild(document.createTextNode(String.valueOf(token.getYAxis())));
                     element.appendChild(yAxis);
 
                     Element width = document.createElement("width");
-                    width.appendChild(document.createTextNode(String.valueOf(entry.getKey().getWidth())));
+                    width.appendChild(document.createTextNode(String.valueOf(token.getWidth())));
                     element.appendChild(width);
-                }
+
             }
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -68,13 +66,12 @@ public class XmlProcessor {
             DOMSource source = new DOMSource(document);
 
 
-            File dic = new File("models/" + uuid);
+            File dic = new File("models/" + trainingFiles);
 
-            StreamResult result = new StreamResult(new File( dic.getPath() + "/" + uuid + ".xml"));
+            StreamResult result = new StreamResult(new File( dic.getPath() + "/" + fileName + ".xml"));
 
             transformer.transform(source, result);
-            log.info("XML File created: {}", uuid);
-            //return uuid;
+            log.info("XML File created: {}", fileName);
         } catch (ParserConfigurationException | TransformerException e) {
             throw new RuntimeException(e);
         }
@@ -124,7 +121,7 @@ public class XmlProcessor {
         return null;
     }
 
-    public static List<Token> readXmlFile(File file){
+    public List<Token> readXmlFile(File file){
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         try (InputStream is = new FileInputStream(file)) {
@@ -164,9 +161,9 @@ public class XmlProcessor {
 
                     Token tmpToken = Token.builder()
                             .tokeName(tokenName)
-                            .xAxis(Float.parseFloat(xAxis))
-                            .yAxis(Float.parseFloat(yAxis))
-                            .width(Float.parseFloat(width))
+                            .xAxis(Double.parseDouble(xAxis))
+                            .yAxis(Double.parseDouble(yAxis))
+                            .width(Double.parseDouble(width))
                             .build();
                     tokenList.add(tmpToken);
                 }
