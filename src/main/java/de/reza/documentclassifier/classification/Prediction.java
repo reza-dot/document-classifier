@@ -26,15 +26,17 @@ public class Prediction {
 
                 if(tokenListOcr.get(i).getTokeName().equals(tokenListClass.get(j).getTokeName())){
                     double distance = calculateDistanceBetweenPoints(tokenListClass.get(j), tokenListOcr.get(i));
-                    if( distance <= 10) {
+                    if(distance <= 30) {
                         amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
                         tokenListClass.remove(j);
                     }
                 }
             }
         }
-        return "Probability of class: " + className + " " + String.format("%.2f",(double) amoutOfFoundedTokens/(double) totalTokens) +
-                "\nNumber of founded tokens: " + amoutOfFoundedTokens + "\nNumber of total tokens: " + totalTokens;
+        return "\nClass: " + className + " "
+                + "\nProbability of class: " +String.format("%.2f",(double) amoutOfFoundedTokens/(double) totalTokens)
+                + "\nNumber of found tokens within document: " + amoutOfFoundedTokens + "\nNumber of total tokens in class: " + totalTokens
+                + "\n---\n\n";
     }
 
     public double calculateDistanceBetweenPoints(Token tokenClass, Token token) {
@@ -56,8 +58,10 @@ public class Prediction {
                 }
             }
         }
-        return "Probability of class: " + classname + " " + String.format("%.2f",(double) amoutOfFoundedTokens/(double) tokenList.size()) +
-                "\nNumber of founded tokens: " + amoutOfFoundedTokens + "\nNumber of total tokens: " + tokenList.size();
+        return "\nClass: " + classname + " "
+                + "\nProbability of class: " +String.format("%.2f",(double) amoutOfFoundedTokens/(double) tokenList.size())
+                + "\nNumber of found tokens within document: " + amoutOfFoundedTokens + "\nNumber of total tokens in class: " + tokenList.size()
+                + "\n---\n\n";
     }
 
     public double calculateDistanceBetweenPoints(TextPositionSequence hit, Token token) {

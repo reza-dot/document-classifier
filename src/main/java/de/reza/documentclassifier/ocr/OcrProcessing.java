@@ -1,6 +1,7 @@
 package de.reza.documentclassifier.ocr;
 
 import de.reza.documentclassifier.pojo.Token;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@Slf4j
 public class OcrProcessing {
 
     @Value("${TESSDATA_PREFIX}")
@@ -57,13 +59,12 @@ public class OcrProcessing {
             for (Word word : it.getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD)) {
 
                 Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
-                tokenList.add(new Token(word.getText(), boundingBox.getX()*0.24 , boundingBox.getY()*0.24, boundingBox.getWidth()));
-                System.out.println("Token: [" + word.getText() + "] X= " + boundingBox.getX() * 0.24  + " Y= " + boundingBox.getY() *0.24 + " Width=" + boundingBox.getWidth() + " Height=" + boundingBox.getHeight());
+                tokenList.add(new Token(word.getText(), boundingBox.getX() * 0.24 , boundingBox.getY() *0.24, boundingBox.getWidth()));
+                log.info("Token: [" + word.getText() + "] X= " + boundingBox.getX() * 0.24 + " Y= " + boundingBox.getY() * 0.24  + " Width=" + boundingBox.getWidth() + " Height=" + boundingBox.getHeight());
 
             }
         }
-
-        System.out.println("time = " + (System.currentTimeMillis() - start)/1000);
+        log.info("time = {}", (System.currentTimeMillis() - start)/1000);
         return tokenList;
     }
 

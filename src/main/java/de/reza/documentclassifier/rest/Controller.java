@@ -47,6 +47,7 @@ public class Controller {
 
 
         PDDocument document = PDDocument.load(file.getInputStream());
+
         File[] files = new File("models/"+ uuid).listFiles();
         Map<String,List<Token>> allTokenLists = new HashMap<>();
         for (File xmlFile : files) {
