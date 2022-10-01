@@ -1,12 +1,13 @@
 package de.reza.documentclassifier.rest;
 
+import de.reza.documentclassifier.classification.Prediction;
+import de.reza.documentclassifier.classification.Training;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
-import de.reza.documentclassifier.utils.PdfProcessor;
+import de.reza.documentclassifier.ocr.OcrProcessing;
 import de.reza.documentclassifier.utils.XmlProcessor;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,20 +22,23 @@ public class Controller {
     DatasetProcessor datasetProcessor;
 
     @Autowired
-    PdfProcessor pdfProcessor;
+    Prediction predicter;
+
+    @Autowired
+    Training trainer;
 
     @Autowired
     XmlProcessor xmlProcessor;
 
-    @Value("${TESSDATA_PREFIX}")
-    private String tessdata;
+    @Autowired
+    OcrProcessing ocrProcessing;
 
     @PostMapping("/api/train")
     public String training(@RequestParam("dataset")MultipartFile file) throws IOException {
 
         String uuid = UUID.randomUUID().toString();
         String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
-        pdfProcessor.getCoordinates(pathToTrainingfiles, uuid);
+        trainer.startTraining(pathToTrainingfiles, uuid);
         return "Your trained model " + uuid;
     }
 
@@ -44,25 +48,32 @@ public class Controller {
 
         PDDocument document = PDDocument.load(file.getInputStream());
         File[] files = new File("models/"+ uuid).listFiles();
-        Set<List<Token>> allTokenLists = new HashSet<>();
+        Map<String,List<Token>> allTokenLists = new HashMap<>();
         for (File xmlFile : files) {
-            allTokenLists.add(xmlProcessor.readXmlFile(xmlFile));
+            allTokenLists.put(xmlFile.getName() ,xmlProcessor.readXmlFile(xmlFile));
         }
 
-
-        Iterator<List<Token>> it = allTokenLists.iterator();
         String[] probs = new String[files.length];
-        int counter=0;
+        int counter = 0;
 
-        while (it.hasNext()) {
-            probs[counter] = pdfProcessor.predict(document,it.next());
-            counter++;
+        int numberOfFoundFonts = ocrProcessing.checkForOcr(document);
+
+        if(numberOfFoundFonts == 0){
+            List<Token> tokenListOcr = ocrProcessing.doOcr(document);
+            for (Map.Entry<String,List<Token>> entry : allTokenLists.entrySet()) {
+                probs[counter] = predicter.predict(tokenListOcr, entry.getKey(),entry.getValue());
+                counter++;
+            }
+            document.close();
+            return Arrays.toString(probs);
+        }else {
+
+            for (Map.Entry<String,List<Token>> entry : allTokenLists.entrySet()) {
+                probs[counter] = predicter.predict(document, entry.getKey(), entry.getValue());
+                counter++;
+            }
+            document.close();
+            return Arrays.toString(probs);
         }
-
-        System.out.println(Arrays.toString(probs));
-
-        document.close();
-
-        return null;
     }
 }

@@ -50,10 +50,10 @@ public class GetTokenLocationAndSize extends PDFTextStripper {
                 boundingBox.add(box);
             token.append(text.getUnicode());
         }
-
+/*
         System.out.println("<"+ token + ">" + " [(X=" + round(boundingBox.getX()) + ",Y=" +  round(boundingBox.getY())
                 + ") height=" +  round(boundingBox.getHeight()) + " width=" +  round(boundingBox.getWidth()) + "]");
-
+ */
 
         tokenList.add(new Token(token.toString(), round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth())));
     }
