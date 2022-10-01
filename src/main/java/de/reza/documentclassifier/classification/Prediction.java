@@ -1,59 +1,47 @@
-package de.reza.documentclassifier.utils;
+package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pojo.Token;
+import de.reza.documentclassifier.utils.TextPositionSequence;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.util.Matrix;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 
-import java.io.*;
-import java.nio.file.Paths;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Service
-public class PdfProcessor {
+public class Prediction {
 
+    public String predict(List<Token> tokenListOcr, String className, List<Token> tokenListClass){
 
-    private PDDocument document;
+        int amoutOfFoundedTokens=0;
+        int totalTokens = tokenListClass.size();
 
-    private List<Token> tokenList;
-    @Autowired
-    XmlProcessor xmlProcessor;
+        for (int i=0; i<=tokenListOcr.size()-1; i++){
 
+            for(int j=0; j<= tokenListClass.size()-1; j++){
 
-    public void getCoordinates(String pathToTrainingFiles, String uuid) throws IOException {
-
-        File[] files = new File(pathToTrainingFiles).listFiles();
-
-        for (File file : files) {
-
-            List<Token> tokenList = new ArrayList<>();
-
-            try (InputStream resource = new FileInputStream(pathToTrainingFiles + file.getName())) {
-
-                PDDocument document = PDDocument.load(resource);
-                PDFTextStripper stripper = new GetTokenLocationAndSize(tokenList);
-                stripper.setSortByPosition(true);
-                stripper.setStartPage(0);
-                stripper.setEndPage( document.getNumberOfPages() );
-                Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
-                stripper.writeText(document, dummy);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                if(tokenListOcr.get(i).getTokeName().equals(tokenListClass.get(j).getTokeName())){
+                    double distance = calculateDistanceBetweenPoints(tokenListClass.get(j), tokenListOcr.get(i));
+                    if( distance <= 10) {
+                        amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
+                        tokenListClass.remove(j);
+                    }
+                }
             }
-            String fileNameWithoutExtension = file.getName().substring(0, file.getName().lastIndexOf('.'));
-            xmlProcessor.generateTokenXmlFile(tokenList, uuid, fileNameWithoutExtension);
         }
-        FileSystemUtils.deleteRecursively(Paths.get(pathToTrainingFiles));
+        return "Probability of class: " + className + " " + String.format("%.2f",(double) amoutOfFoundedTokens/(double) totalTokens) +
+                "\nNumber of founded tokens: " + amoutOfFoundedTokens + "\nNumber of total tokens: " + totalTokens;
     }
 
-    public String predict(PDDocument document, List<Token> tokenList) {
+    public double calculateDistanceBetweenPoints(Token tokenClass, Token token) {
+        return Math.sqrt((tokenClass.getYAxis() - token.getYAxis()) * (tokenClass.getYAxis()- token.getYAxis()) + (tokenClass.getXAxis() - token.getXAxis()) * (tokenClass.getXAxis()  - token.getXAxis()));
+    }
+
+    public String predict(PDDocument document, String classname, List<Token> tokenList) {
 
         int amoutOfFoundedTokens = 0;
         for (Token token : tokenList) {
@@ -68,7 +56,7 @@ public class PdfProcessor {
                 }
             }
         }
-        return "Probability: " + String.format("%.2f",(double) amoutOfFoundedTokens/(double) tokenList.size()) +
+        return "Probability of class: " + classname + " " + String.format("%.2f",(double) amoutOfFoundedTokens/(double) tokenList.size()) +
                 "\nNumber of founded tokens: " + amoutOfFoundedTokens + "\nNumber of total tokens: " + tokenList.size();
     }
 
@@ -134,4 +122,6 @@ public class PdfProcessor {
 
         return hits;
     }
+
+
 }
