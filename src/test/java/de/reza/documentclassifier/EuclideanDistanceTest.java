@@ -4,10 +4,12 @@ import de.reza.documentclassifier.classification.EuclideanDistance;
 import de.reza.documentclassifier.pojo.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@SpringBootTest
 public class EuclideanDistanceTest {
 
     @Test

@@ -1,7 +1,7 @@
 package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pojo.Token;
-import de.reza.documentclassifier.utils.TextPositionSequence;
+import de.reza.documentclassifier.pdfutils.TextPositionSequence;
 
 public class EuclideanDistance {
 
