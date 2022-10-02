@@ -35,7 +35,7 @@ public class Prediction {
                 boolean match = tokenListClass.removeIf(
                         tokenClass ->
                                 tokenClass.getTokeName().equals(token.getTokeName()) &&
-                                calculateDistanceBetweenPoints(tokenClass, token) <= maxDistance);
+                                EuclideanDistance.calculateDistanceBetweenPoints(tokenClass, token) <= maxDistance);
                 if (match){
                     numberOfFoundToken.incrementAndGet();
                 }
@@ -46,15 +46,6 @@ public class Prediction {
                 + "\n---\n\n";
     }
 
-    /**
-     * Calculates the distance between two points
-     * @param tokenClass    Token of a class
-     * @param token         Token of given document
-     * @return              distance between two points
-     */
-    public double calculateDistanceBetweenPoints(Token tokenClass, Token token) {
-        return Math.sqrt((tokenClass.getYAxis() - token.getYAxis()) * (tokenClass.getYAxis()- token.getYAxis()) + (tokenClass.getXAxis() - token.getXAxis()) * (tokenClass.getXAxis()  - token.getXAxis()));
-    }
 
     /**
      * Predicting a given document based on the token lists of the classes.
@@ -71,7 +62,7 @@ public class Prediction {
             for (int page = 1; page <= document.getNumberOfPages(); page++) {
                 List<TextPositionSequence> hits = findWord(document, page, token.getTokeName());
                 for (TextPositionSequence hit : hits) {
-                    double dinstance = calculateDistanceBetweenPoints(hit, token);
+                    double dinstance = EuclideanDistance.calculateDistanceBetweenPoints(hit, token);
                     if (dinstance <= maxDistance) {
                         amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
                     }
@@ -82,16 +73,6 @@ public class Prediction {
                 + "\nProbability of class: " +String.format("%.2f",(double) amoutOfFoundedTokens/(double) tokenList.size())
                 + "\nNumber of found tokens within document: " + amoutOfFoundedTokens + "\nNumber of total tokens in class: " + tokenList.size()
                 + "\n---\n\n";
-    }
-
-    /**
-     * Calculates the distance between two points
-     * @param hit    Token of a class
-     * @param token         Token of given document
-     * @return              distance between two points
-     */
-    public double calculateDistanceBetweenPoints(TextPositionSequence hit, Token token) {
-        return Math.sqrt((hit.getY() - token.getYAxis()) * (hit.getY()- token.getYAxis()) + (hit.getX() - token.getXAxis()) * (hit.getX() - token.getXAxis()));
     }
 
     /**
