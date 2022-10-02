@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
-public class OcrProcessing {
+public class OcrProcessor {
 
     @Value("${TESSDATA_PREFIX}")
     private String tessdata;
