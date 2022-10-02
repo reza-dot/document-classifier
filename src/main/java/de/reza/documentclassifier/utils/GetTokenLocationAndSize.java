@@ -24,15 +24,16 @@ public class GetTokenLocationAndSize extends PDFTextStripper {
     protected void writeString(String string, List<TextPosition> textPositions){
         String wordSeparator = getWordSeparator();
         List<TextPosition> word = new ArrayList<>();
-        for (TextPosition text : textPositions) {
-            String thisChar = text.getUnicode();
+        textPositions.forEach(w -> {
+            String thisChar = w.getUnicode();
             if (thisChar != null && thisChar.length() >= 1 && !thisChar.equals(wordSeparator)) {
-                word.add(text);
+                word.add(w);
             } else if (!word.isEmpty()) {
                 getTokenBoundingBox(word);
                 word.clear();
             }
-        }
+
+        });
         if (!word.isEmpty()) {
             getTokenBoundingBox(word);
             word.clear();

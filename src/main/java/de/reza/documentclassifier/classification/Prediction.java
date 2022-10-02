@@ -6,6 +6,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import org.apache.pdfbox.util.Matrix;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -15,18 +16,26 @@ import java.util.List;
 @Service
 public class Prediction {
 
+    @Value("${MAX_DISTANCE}")
+    private int maxDistance;
+
+    /**
+     * Predicting a given token list based on the token lists of the classes.
+     * @param tokenListOcr      Recognized tokens by OCR from the given document
+     * @param className         The classname of {@tokenListClass}
+     * @param tokenListClass    Included tokens in the class
+     * @return                  Returns the relative frequency of the found tokens in the document
+     */
     public String predict(List<Token> tokenListOcr, String className, List<Token> tokenListClass){
 
         int amoutOfFoundedTokens=0;
         int totalTokens = tokenListClass.size();
 
         for (int i=0; i<=tokenListOcr.size()-1; i++){
-
             for(int j=0; j<= tokenListClass.size()-1; j++){
-
                 if(tokenListOcr.get(i).getTokeName().equals(tokenListClass.get(j).getTokeName())){
                     double distance = calculateDistanceBetweenPoints(tokenListClass.get(j), tokenListOcr.get(i));
-                    if(distance <= 30) {
+                    if(distance <= maxDistance) {
                         amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
                         tokenListClass.remove(j);
                     }
@@ -39,10 +48,23 @@ public class Prediction {
                 + "\n---\n\n";
     }
 
+    /**
+     * Calculates the distance between two points
+     * @param tokenClass    Token of a class
+     * @param token         Token of given document
+     * @return              distance between two points
+     */
     public double calculateDistanceBetweenPoints(Token tokenClass, Token token) {
         return Math.sqrt((tokenClass.getYAxis() - token.getYAxis()) * (tokenClass.getYAxis()- token.getYAxis()) + (tokenClass.getXAxis() - token.getXAxis()) * (tokenClass.getXAxis()  - token.getXAxis()));
     }
 
+    /**
+     * Predicting a given document based on the token lists of the classes.
+     * @param document      Given document
+     * @param classname     The classname of {@tokenListClass}
+     * @param tokenList     Included tokens in the class
+     * @return              Returns the relative frequency of the found tokens in the document
+     */
     public String predict(PDDocument document, String classname, List<Token> tokenList) {
 
         int amoutOfFoundedTokens = 0;
@@ -52,7 +74,7 @@ public class Prediction {
                 List<TextPositionSequence> hits = findWord(document, page, token.getTokeName());
                 for (TextPositionSequence hit : hits) {
                     double dinstance = calculateDistanceBetweenPoints(hit, token);
-                    if (dinstance <= 0.5) {
+                    if (dinstance <= maxDistance) {
                         amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
                     }
                 }
@@ -64,11 +86,24 @@ public class Prediction {
                 + "\n---\n\n";
     }
 
+    /**
+     * Calculates the distance between two points
+     * @param hit    Token of a class
+     * @param token         Token of given document
+     * @return              distance between two points
+     */
     public double calculateDistanceBetweenPoints(TextPositionSequence hit, Token token) {
         return Math.sqrt((hit.getY() - token.getYAxis()) * (hit.getY()- token.getYAxis()) + (hit.getX() - token.getXAxis()) * (hit.getX() - token.getXAxis()));
     }
 
-    static List<TextPositionSequence> findWord(PDDocument document, int page, String searchTerm)
+    /**
+     * Finding searched word on a given page within the document
+     * @param document      Given document
+     * @param page          Page of the document 
+     * @param searchWord    searched word
+     * @return              List of {@link TextPositionSequence} of the searched word
+     */
+    static List<TextPositionSequence> findWord(PDDocument document, int page, String searchWord)
     {
         final List<TextPosition> allTextPositions = new ArrayList<>();
         PDFTextStripper stripper = null;
@@ -118,9 +153,9 @@ public class Prediction {
 
         int fromIndex = 0;
         int index;
-        while ((index = string.indexOf(searchTerm, fromIndex)) > -1)
+        while ((index = string.indexOf(searchWord, fromIndex)) > -1)
         {
-            hits.add(word.subSequence(index, index + searchTerm.length()));
+            hits.add(word.subSequence(index, index + searchWord.length()));
             fromIndex = index + 1;
         }
 

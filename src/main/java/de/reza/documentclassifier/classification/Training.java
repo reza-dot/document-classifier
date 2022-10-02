@@ -25,6 +25,7 @@ public class Training {
 
         File[] files = new File(pathToTrainingFiles).listFiles();
 
+
         for (File file : files) {
 
             List<Token> tokenList = new ArrayList<>();

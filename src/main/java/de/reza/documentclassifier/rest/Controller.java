@@ -47,7 +47,6 @@ public class Controller {
 
 
         PDDocument document = PDDocument.load(file.getInputStream());
-
         File[] files = new File("models/"+ uuid).listFiles();
         Map<String,List<Token>> allTokenLists = new HashMap<>();
         for (File xmlFile : files) {
@@ -57,9 +56,9 @@ public class Controller {
         String[] probs = new String[files.length];
         int counter = 0;
 
-        int numberOfFoundFonts = ocrProcessing.checkForOcr(document);
+        boolean numberOfFoundFonts = ocrProcessing.checkForOcr(document);
 
-        if(numberOfFoundFonts == 0){
+        if(numberOfFoundFonts){
             List<Token> tokenListOcr = ocrProcessing.doOcr(document);
             for (Map.Entry<String,List<Token>> entry : allTokenLists.entrySet()) {
                 probs[counter] = predicter.predict(tokenListOcr, entry.getKey(),entry.getValue());
