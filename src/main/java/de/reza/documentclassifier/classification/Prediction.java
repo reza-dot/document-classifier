@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class Prediction {
@@ -20,7 +21,7 @@ public class Prediction {
     private int maxDistance;
 
     /**
-     * Predicting a given token list based on the token lists of the classes.
+     * Predicting a given token list based on the token lists of a class.
      * @param tokenListOcr      Recognized tokens by OCR from the given document
      * @param className         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
@@ -28,23 +29,20 @@ public class Prediction {
      */
     public String predict(List<Token> tokenListOcr, String className, List<Token> tokenListClass){
 
-        int amoutOfFoundedTokens=0;
         int totalTokens = tokenListClass.size();
-
-        for (int i=0; i<=tokenListOcr.size()-1; i++){
-            for(int j=0; j<= tokenListClass.size()-1; j++){
-                if(tokenListOcr.get(i).getTokeName().equals(tokenListClass.get(j).getTokeName())){
-                    double distance = calculateDistanceBetweenPoints(tokenListClass.get(j), tokenListOcr.get(i));
-                    if(distance <= maxDistance) {
-                        amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
-                        tokenListClass.remove(j);
-                    }
+        AtomicInteger numberOfFoundToken = new AtomicInteger();
+        tokenListOcr.forEach(token -> {
+                boolean match = tokenListClass.removeIf(
+                        tokenClass ->
+                                tokenClass.getTokeName().equals(token.getTokeName()) &&
+                                calculateDistanceBetweenPoints(tokenClass, token) <= maxDistance);
+                if (match){
+                    numberOfFoundToken.incrementAndGet();
                 }
-            }
-        }
+        });
         return "\nClass: " + className + " "
-                + "\nProbability of class: " +String.format("%.2f",(double) amoutOfFoundedTokens/(double) totalTokens)
-                + "\nNumber of found tokens within document: " + amoutOfFoundedTokens + "\nNumber of total tokens in class: " + totalTokens
+                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundToken.get()/(double) totalTokens)
+                + "\nNumber of found tokens within document: " + numberOfFoundToken.get() + "\nNumber of total tokens in class: " + totalTokens
                 + "\n---\n\n";
     }
 
@@ -147,7 +145,7 @@ public class Prediction {
             throw new RuntimeException(e);
         }
 
-        final List<TextPositionSequence> hits = new ArrayList<TextPositionSequence>();
+        final List<TextPositionSequence> hits = new ArrayList<>();
         TextPositionSequence word = new TextPositionSequence(allTextPositions);
         String string = word.toString();
 
