@@ -1,7 +1,7 @@
 package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pojo.Token;
-import de.reza.documentclassifier.utils.GetTokenLocationAndSize;
+import de.reza.documentclassifier.pdfutils.GetTokenLocationAndSize;
 import de.reza.documentclassifier.utils.XmlProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -51,6 +51,5 @@ public class Training {
         else{
             log.error("Path to training files not found");
         }
-
     }
 }

@@ -1,4 +1,4 @@
-package de.reza.documentclassifier.utils;
+package de.reza.documentclassifier.pdfutils;
 
 import org.apache.pdfbox.text.TextPosition;
 

@@ -1,4 +1,4 @@
-package de.reza.documentclassifier.ocr;
+package de.reza.documentclassifier.ocrutils;
 
 import de.reza.documentclassifier.pojo.Token;
 import lombok.extern.slf4j.Slf4j;

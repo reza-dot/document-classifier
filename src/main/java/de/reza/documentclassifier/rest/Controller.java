@@ -4,7 +4,7 @@ import de.reza.documentclassifier.classification.Prediction;
 import de.reza.documentclassifier.classification.Training;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
-import de.reza.documentclassifier.ocr.OcrProcessor;
+import de.reza.documentclassifier.ocrutils.OcrProcessor;
 import de.reza.documentclassifier.utils.XmlProcessor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

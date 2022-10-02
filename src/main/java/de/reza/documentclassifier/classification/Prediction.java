@@ -1,7 +1,7 @@
 package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pojo.Token;
-import de.reza.documentclassifier.utils.TextPositionSequence;
+import de.reza.documentclassifier.pdfutils.TextPositionSequence;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
@@ -19,15 +19,17 @@ public class Prediction {
 
     @Value("${MAX_DISTANCE}")
     private int maxDistance;
+    @Value("${MAX_DISTANCE_OCR}")
+    private int maxDistanceOcr;
 
     /**
      * Predicting a given token list based on the token lists of a class.
      * @param tokenListOcr      Recognized tokens by OCR from the given document
-     * @param className         The classname of {@tokenListClass}
+     * @param classname         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
      * @return                  Returns the relative frequency of the found tokens in the document
      */
-    public String predict(List<Token> tokenListOcr, String className, List<Token> tokenListClass){
+    public String predict(List<Token> tokenListOcr, String classname, List<Token> tokenListClass){
 
         int totalTokens = tokenListClass.size();
         AtomicInteger numberOfFoundToken = new AtomicInteger();
@@ -35,12 +37,12 @@ public class Prediction {
                 boolean match = tokenListClass.removeIf(
                         tokenClass ->
                                 tokenClass.getTokeName().equals(token.getTokeName()) &&
-                                EuclideanDistance.calculateDistanceBetweenPoints(tokenClass, token) <= maxDistance);
+                                EuclideanDistance.calculateDistanceBetweenPoints(tokenClass, token) <= maxDistanceOcr);
                 if (match){
                     numberOfFoundToken.incrementAndGet();
                 }
         });
-        return "\nClass: " + className + " "
+        return "\nClass: " + classname + " "
                 + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundToken.get()/(double) totalTokens)
                 + "\nNumber of found tokens within document: " + numberOfFoundToken.get() + "\nNumber of total tokens in class: " + totalTokens
                 + "\n---\n\n";
@@ -56,22 +58,20 @@ public class Prediction {
      */
     public String predict(PDDocument document, String classname, List<Token> tokenList) {
 
-        int amoutOfFoundedTokens = 0;
-        for (Token token : tokenList) {
-
+        AtomicInteger numberOfFoundTokens = new AtomicInteger();
+        tokenList.forEach(token -> {
             for (int page = 1; page <= document.getNumberOfPages(); page++) {
-                List<TextPositionSequence> hits = findWord(document, page, token.getTokeName());
-                for (TextPositionSequence hit : hits) {
-                    double dinstance = EuclideanDistance.calculateDistanceBetweenPoints(hit, token);
-                    if (dinstance <= maxDistance) {
-                        amoutOfFoundedTokens = amoutOfFoundedTokens + 1;
-                    }
+            List<TextPositionSequence> hits = findWord(document, page, token.getTokeName());
+            hits.forEach(hit -> {
+                boolean match = EuclideanDistance.calculateDistanceBetweenPoints(hit, token) <= maxDistance;
+                if(match){
+                    numberOfFoundTokens.incrementAndGet();
                 }
-            }
-        }
+            });
+        }});
         return "\nClass: " + classname + " "
-                + "\nProbability of class: " +String.format("%.2f",(double) amoutOfFoundedTokens/(double) tokenList.size())
-                + "\nNumber of found tokens within document: " + amoutOfFoundedTokens + "\nNumber of total tokens in class: " + tokenList.size()
+                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundTokens.get()/(double) tokenList.size())
+                + "\nNumber of found tokens within document: " + numberOfFoundTokens.get() + "\nNumber of total tokens in class: " + tokenList.size()
                 + "\n---\n\n";
     }
 
