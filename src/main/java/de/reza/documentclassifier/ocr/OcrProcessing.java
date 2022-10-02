@@ -30,16 +30,26 @@ public class OcrProcessing {
     @Value("${TESSDATA_PREFIX}")
     private String tessdata;
 
-    public int checkForOcr(PDDocument doc) {
+    /**
+     * Checks if the PDF document is searchable. Counts the fonts that appear in the document.
+     * @param doc   Given document
+     * @return      True: No font occurs in the document. False: Font occurs in the document.
+     */
+    public boolean checkForOcr(PDDocument doc) {
 
         PDPage page = doc.getPage(0); // 0 based
         PDResources resources = page.getResources();
-
         AtomicInteger number= new AtomicInteger();
         resources.getFontNames().iterator().forEachRemaining(font -> number.getAndIncrement());
-        return number.get();
+        return number.get() == 0;
     }
 
+    /**
+     * Performs OCR from the text and tokenizes the text. Coordinates of the tokens are determined.
+     * @param document      Given document
+     * @return              List of {@link Token}
+     * @throws IOException  OCR processing does not work
+     */
     public List<Token> doOcr(PDDocument document) throws IOException {
 
         long start = System.currentTimeMillis();
