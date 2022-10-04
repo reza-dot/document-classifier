@@ -1,4 +1,4 @@
-package de.reza.documentclassifier.classification;
+package de.reza.documentclassifier.utils;
 
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.pdfutils.TextPositionSequence;

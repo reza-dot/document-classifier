@@ -30,6 +30,15 @@ public class OcrProcessor {
     @Value("${TESSDATA_PREFIX}")
     private String tessdata;
 
+    @Value("${SCALE_FACTOR_X}")
+    private double scaleFactorX;
+
+    @Value("${SCALE_FACTOR_Y}")
+    private double scaleFactorY;
+
+    @Value("${DPI}")
+    private int dpi;
+
     /**
      * Checks if the PDF document is searchable. Counts the fonts that appear in the document.
      * @param doc   Given document
@@ -57,24 +66,25 @@ public class OcrProcessor {
         File tessDataFolder = LoadLibs.extractTessResources(tessdata);
         it.setDatapath(tessDataFolder.getAbsolutePath());
         it.setLanguage("deu");
-        it.setVariable("user_defined_dpi", "300");
+        it.setVariable("user_defined_dpi", String.valueOf(dpi));
         it.setPageSegMode(1);
         it.setOcrEngineMode(1);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         List<Token> tokenList = new ArrayList<>();
 
         for (int page = 0; page < document.getNumberOfPages(); page++) {
-            BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, 300, ImageType.RGB);
+            BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
 
             for (Word word : it.getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD)) {
-
-                Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
-                tokenList.add(new Token(word.getText(), boundingBox.getX() * 0.24 , boundingBox.getY() *0.24, boundingBox.getWidth()));
-                log.info("Token: [" + word.getText() + "] X= " + boundingBox.getX() * 0.24 + " Y= " + boundingBox.getY() * 0.24  + " Width=" + boundingBox.getWidth() + " Height=" + boundingBox.getHeight());
-
+                // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
+                if(!word.getText().equals(" ")) {
+                    Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
+                    tokenList.add(new Token(word.getText(), boundingBox.getX() * scaleFactorX, boundingBox.getY() * scaleFactorY, boundingBox.getWidth()));
+                    log.info("Token: [" + word.getText() + "] X= " + boundingBox.getX() * scaleFactorX + " Y= " + boundingBox.getY() * scaleFactorY + " Width=" + boundingBox.getWidth() + " Height=" + boundingBox.getHeight());
+                }
             }
         }
-        log.info("time = {}", (System.currentTimeMillis() - start)/1000);
+        log.info("time = {} milliseconds", (System.currentTimeMillis() - start));
         return tokenList;
     }
 
