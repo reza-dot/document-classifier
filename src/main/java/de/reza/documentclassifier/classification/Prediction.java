@@ -2,6 +2,7 @@ package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.pdfutils.TextPositionSequence;
+import de.reza.documentclassifier.utils.EuclideanDistance;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;

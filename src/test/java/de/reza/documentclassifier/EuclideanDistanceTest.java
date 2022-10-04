@@ -1,6 +1,6 @@
 package de.reza.documentclassifier;
 
-import de.reza.documentclassifier.classification.EuclideanDistance;
+import de.reza.documentclassifier.utils.EuclideanDistance;
 import de.reza.documentclassifier.pojo.Token;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

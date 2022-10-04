@@ -1,6 +1,7 @@
 package de.reza.documentclassifier.pdfutils;
 
 import de.reza.documentclassifier.pojo.Token;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 
@@ -11,6 +12,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class GetTokenLocationAndSize extends PDFTextStripper {
 
     private List<Token> tokenList;
@@ -51,11 +53,7 @@ public class GetTokenLocationAndSize extends PDFTextStripper {
                 boundingBox.add(box);
             token.append(text.getUnicode());
         }
-/*
-        System.out.println("<"+ token + ">" + " [(X=" + round(boundingBox.getX()) + ",Y=" +  round(boundingBox.getY())
-                + ") height=" +  round(boundingBox.getHeight()) + " width=" +  round(boundingBox.getWidth()) + "]");
- */
-
+        log.info("Token [{}]X= {} Y={} width={}", token, round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth()));
         tokenList.add(new Token(token.toString(), round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth())));
     }
 
