@@ -43,7 +43,7 @@ public class Prediction {
                     numberOfFoundToken.incrementAndGet();
                 }
         });
-        return "\nClass: " + classname + " "
+        return "\nClass: " + classname.split("\\.")[0] + " "
                 + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundToken.get()/(double) totalTokens)
                 + "\nNumber of found tokens within document: " + numberOfFoundToken.get() + "\nNumber of total tokens in class: " + totalTokens
                 + "\n---\n\n";
@@ -70,7 +70,7 @@ public class Prediction {
                 }
             });
         }});
-        return "\nClass: " + classname + " "
+        return "\nClass: " + classname.split("\\.")[0] + " "
                 + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundTokens.get()/(double) tokenList.size())
                 + "\nNumber of found tokens within document: " + numberOfFoundTokens.get() + "\nNumber of total tokens in class: " + tokenList.size()
                 + "\n---\n\n";

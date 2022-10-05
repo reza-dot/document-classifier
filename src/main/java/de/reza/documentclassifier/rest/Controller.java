@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @Slf4j
@@ -57,29 +58,29 @@ public class Controller {
         try {
             document = PDDocument.load(file.get().getInputStream());
             File[] files = new File("models/" + uuid).listFiles();
-            Map<String, List<Token>> allTokenLists = new HashMap<>();
+            Map<String, List<Token>> allClasses = new HashMap<>();
             for (File xmlFile : files) {
-                allTokenLists.put(xmlFile.getName(), xmlProcessor.readXmlFile(xmlFile));
+                allClasses.put(xmlFile.getName(), xmlProcessor.readXmlFile(xmlFile));
             }
 
             String[] probs = new String[files.length];
-            int counter = 0;
+            AtomicInteger counter = new AtomicInteger();
 
             boolean numberOfFoundFonts = ocrProcessing.checkForOcr(document);
 
             if (numberOfFoundFonts) {
                 List<Token> tokenListOcr = ocrProcessing.doOcr(document);
-                for (Map.Entry<String, List<Token>> entry : allTokenLists.entrySet()) {
-                    probs[counter] = predicter.predict(tokenListOcr, entry.getKey(), entry.getValue());
-                    counter++;
+                for (Map.Entry<String, List<Token>> entry : allClasses.entrySet()) {
+                    probs[counter.get()] = predicter.predict(tokenListOcr, entry.getKey(), entry.getValue());
+                    counter.incrementAndGet();
                 }
                 document.close();
                 return Arrays.toString(probs);
             } else {
 
-                for (Map.Entry<String, List<Token>> entry : allTokenLists.entrySet()) {
-                    probs[counter] = predicter.predict(document, entry.getKey(), entry.getValue());
-                    counter++;
+                for (Map.Entry<String, List<Token>> entry : allClasses.entrySet()) {
+                    probs[counter.get()] = predicter.predict(document, entry.getKey(), entry.getValue());
+                    counter.incrementAndGet();
                 }
                 document.close();
                 return Arrays.toString(probs);
