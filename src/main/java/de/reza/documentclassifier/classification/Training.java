@@ -24,17 +24,22 @@ public class Training {
         this.xmlProcessor = xmlProcessor;
     }
 
-
-    public void startTraining(String pathToTrainingFiles, String uuid) throws IOException {
+    /**
+     * Recognizes tokens with their corresponding coordinates on the PDF document.
+     * Saves them as XML file in the next step as a class in the model.
+     * @param pathToTrainingFiles   PDF documents
+     * @param uuid                  Identification number for a model
+     */
+    public void startTraining(String pathToTrainingFiles, String uuid) {
 
         Optional<File[]> files = Optional.ofNullable(new File(pathToTrainingFiles).listFiles());
 
         if (files.isPresent()) {
             for (File file : files.get()) {
-                List<Token> tokenList = new ArrayList<>();
+                HashSet<Token> tokenSet = new HashSet<>();
                 try (InputStream resource = new FileInputStream(pathToTrainingFiles + file.getName())) {
                     PDDocument document = PDDocument.load(resource);
-                    PDFTextStripper stripper = new GetTokenLocationAndSize(tokenList);
+                    PDFTextStripper stripper = new GetTokenLocationAndSize(tokenSet);
                     stripper.setSortByPosition(true);
                     stripper.setStartPage(0);
                     stripper.setEndPage(document.getNumberOfPages());
@@ -44,9 +49,13 @@ public class Training {
                     throw new RuntimeException(e);
                 }
                 String fileNameWithoutExtension = file.getName().substring(0, file.getName().lastIndexOf('.'));
-                xmlProcessor.generateTokenXmlFile(tokenList, uuid, fileNameWithoutExtension);
+                xmlProcessor.generateTokenXmlFile(tokenSet, uuid, fileNameWithoutExtension);
             }
-            FileSystemUtils.deleteRecursively(Paths.get(pathToTrainingFiles));
+            try {
+                FileSystemUtils.deleteRecursively(Paths.get(pathToTrainingFiles));
+            } catch (IOException e) {
+                log.error("Training files could not be deleted");
+            }
         }
         else{
             log.error("Path to training files not found");

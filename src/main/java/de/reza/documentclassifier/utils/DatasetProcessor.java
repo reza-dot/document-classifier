@@ -25,8 +25,7 @@ public class DatasetProcessor {
         Path filepath = Paths.get("models/" + uuid, dataset.getOriginalFilename());
         try {
             dataset.transferTo(filepath);
-            new ZipFile(filepath.toFile())
-                    .extractAll("models/" + uuid + "/dataset/");
+            new ZipFile(filepath.toFile()).extractAll("models/" + uuid + "/dataset/");
             filepath.toFile().delete();
             return "models/" + uuid + "/dataset/";
         } catch (IOException e) {
