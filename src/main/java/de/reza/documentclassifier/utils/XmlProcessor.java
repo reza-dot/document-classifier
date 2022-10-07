@@ -15,8 +15,8 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -25,7 +25,7 @@ public class XmlProcessor {
     /**
      * Creates an XML file with the recognized {@link Token}.
      * Syntax of XML-File:
-     * <tokenList>
+     * <tokenSet>
      * <token>
      * 		<tokenKey>...</tokenKey>
      * 		<xAxis>...</xAxis>
@@ -33,21 +33,21 @@ public class XmlProcessor {
      * 		<width>...</width>
      * 	</token>
      * 	...
-     * 	</tokenList>
-     * @param tokenList         List of {@link Token}
+     * 	</tokenSet>
+     * @param tokenSet         List of {@link Token}
      * @param uuid              UUID of the model
-     * @param fileName          Name of the class within the model
+     * @param filename          Name of the class within the model
      */
-    public void generateTokenXmlFile(List<Token> tokenList, String uuid, String fileName) {
+    public void generateTokenXmlFile(Set<Token> tokenSet, String uuid, String filename) {
 
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dbuilder = dbFactory.newDocumentBuilder();
             Document document = dbuilder.newDocument();
-            Element tokens = document.createElement("tokenList");
+            Element tokens = document.createElement("tokenSet");
             document.appendChild(tokens);
 
-            tokenList.forEach(token-> {Element element = document.createElement("token");
+            tokenSet.forEach(token-> {Element element = document.createElement("token");
                 tokens.appendChild(element);
 
                 Element tokenKey = document.createElement("tokenKey");
@@ -70,9 +70,9 @@ public class XmlProcessor {
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(document);
             File dic = new File("models/" + uuid);
-            StreamResult result = new StreamResult(new File( dic.getPath() + "/" + fileName + ".xml"));
+            StreamResult result = new StreamResult(new File( dic.getPath() + "/" + filename + ".xml"));
             transformer.transform(source, result);
-            log.info("XML File created: {}", fileName);
+            log.info("XML File created: {}", filename);
         } catch (ParserConfigurationException | TransformerException e) {
             throw new RuntimeException(e);
         }
@@ -84,12 +84,12 @@ public class XmlProcessor {
      * @param xmlFile   XML file within the model
      * @return          list of all Tokens within the XML file
      */
-    public List<Token> readXmlFile(File xmlFile){
+    public HashSet<Token> readXmlFile(File xmlFile){
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         try (InputStream is = new FileInputStream(xmlFile)) {
 
-            List<Token> tokenList = new ArrayList<>();
+            HashSet<Token> tokenSet = new HashSet<>();
 
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(is);
@@ -128,10 +128,10 @@ public class XmlProcessor {
                             .yAxis(Double.parseDouble(yAxis))
                             .width(Double.parseDouble(width))
                             .build();
-                    tokenList.add(tmpToken);
+                    tokenSet.add(tmpToken);
                 }
             }
-            return tokenList;
+            return tokenSet;
         } catch (Exception e) {
             return null;
         }

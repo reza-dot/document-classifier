@@ -23,5 +23,4 @@ public class EuclideanDistanceTest {
         BigDecimal roundedDistance = new BigDecimal(distance).setScale(2, RoundingMode.HALF_UP);
         Assertions.assertEquals(31.99,roundedDistance.doubleValue());
     }
-
 }

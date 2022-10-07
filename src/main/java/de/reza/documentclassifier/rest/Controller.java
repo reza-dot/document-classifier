@@ -9,7 +9,6 @@ import de.reza.documentclassifier.utils.XmlProcessor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,69 +21,61 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class Controller {
 
-    @Autowired
     DatasetProcessor datasetProcessor;
-
-    @Autowired
-    Prediction predicter;
-
-    @Autowired
+    Prediction predictor;
     Training trainer;
-
-    @Autowired
     XmlProcessor xmlProcessor;
+    OcrProcessor ocrProcessor;
+    
+    public Controller(DatasetProcessor datasetProcessor, Prediction predicter, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor){
+        this.datasetProcessor = datasetProcessor;
+        this.predictor = predicter;
+        this.trainer = trainer;
+        this.xmlProcessor = xmlProcessor;
+        this.ocrProcessor = ocrProcessor;
+    }
 
-    @Autowired
-    OcrProcessor ocrProcessing;
 
     @PostMapping("/api/train")
     public String training(@RequestParam("dataset")@NonNull MultipartFile file) {
 
-        try {
-            String uuid = UUID.randomUUID().toString();
-            String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
-            trainer.startTraining(pathToTrainingfiles, uuid);
-            return "Your trained model " + uuid;
-        } catch (IOException e) {
-            log.error("No valid training data was transferred");
-            return "No valid training data was transferred";
-        }
+        String uuid = UUID.randomUUID().toString();
+        String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
+        trainer.startTraining(pathToTrainingfiles, uuid);
+        return "Your trained model " + uuid;
     }
 
     @GetMapping("/api/predict/{uuid}")
     public String predict(@PathVariable("uuid") @NonNull String uuid, @RequestParam("document") @NonNull Optional<MultipartFile> file)  {
 
-        PDDocument document = null;
+        PDDocument document;
         try {
             document = PDDocument.load(file.get().getInputStream());
-            File[] files = new File("models/" + uuid).listFiles();
-            Map<String, List<Token>> allClasses = new HashMap<>();
-            for (File xmlFile : files) {
+            Optional<File[]> files = Optional.ofNullable(new File("models/" + uuid).listFiles());
+
+            Map<String, HashSet<Token>> allClasses = new HashMap<>();
+            for (File xmlFile : files.get()) {
                 allClasses.put(xmlFile.getName(), xmlProcessor.readXmlFile(xmlFile));
             }
 
-            String[] probs = new String[files.length];
+            String[] probabilities = new String[files.get().length];
             AtomicInteger counter = new AtomicInteger();
 
-            boolean numberOfFoundFonts = ocrProcessing.checkForOcr(document);
-
-            if (numberOfFoundFonts) {
-                List<Token> tokenListOcr = ocrProcessing.doOcr(document);
-                for (Map.Entry<String, List<Token>> entry : allClasses.entrySet()) {
-                    probs[counter.get()] = predicter.predict(tokenListOcr, entry.getKey(), entry.getValue());
+            if (!ocrProcessor.isReadable(document)) {
+                HashSet<Token> tokenListOcr = ocrProcessor.doOcr(document);
+                for (Map.Entry<String, HashSet<Token>> entry : allClasses.entrySet()) {
+                    probabilities[counter.get()] = predictor.predict(tokenListOcr, entry.getKey(), entry.getValue());
                     counter.incrementAndGet();
                 }
-                document.close();
-                return Arrays.toString(probs);
             } else {
 
-                for (Map.Entry<String, List<Token>> entry : allClasses.entrySet()) {
-                    probs[counter.get()] = predicter.predict(document, entry.getKey(), entry.getValue());
+                for (Map.Entry<String, HashSet<Token>> entry : allClasses.entrySet()) {
+                    probabilities[counter.get()] = predictor.predict(document, entry.getKey(), entry.getValue());
                     counter.incrementAndGet();
                 }
-                document.close();
-                return Arrays.toString(probs);
             }
+            document.close();
+            return Arrays.toString(probabilities);
         } catch (IOException e) {
             log.error("No file provided");
             return "No file provided";

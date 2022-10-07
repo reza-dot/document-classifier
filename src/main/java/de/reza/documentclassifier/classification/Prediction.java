@@ -3,6 +3,7 @@ package de.reza.documentclassifier.classification;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.pdfutils.TextPositionSequence;
 import de.reza.documentclassifier.utils.EuclideanDistance;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
@@ -12,10 +13,12 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@Slf4j
 public class Prediction {
 
     @Value("${MAX_DISTANCE}")
@@ -25,27 +28,25 @@ public class Prediction {
 
     /**
      * Predicting a given token list based on the token lists of a class.
-     * @param tokenListOcr      Recognized tokens by OCR from the given document
-     * @param classname         The classname of {@tokenListClass}
-     * @param tokenListClass    Included tokens in the class
+     * @param tokenSetOcr       Set of recognized tokens by OCR from the given document
+     * @param classname         The classname of {@tokenSetClass}
+     * @param tokenSetClass     Included tokens in the class
      * @return                  Returns the relative frequency of the found tokens in the document
      */
-    public String predict(List<Token> tokenListOcr, String classname, List<Token> tokenListClass){
+    public String predict(HashSet<Token> tokenSetOcr, String classname, HashSet<Token> tokenSetClass){
 
-        int totalTokens = tokenListClass.size();
         AtomicInteger numberOfFoundToken = new AtomicInteger();
-        tokenListOcr.forEach(token -> {
-                boolean match = tokenListClass.removeIf(
-                        tokenClass ->
-                                tokenClass.getTokeName().equals(token.getTokeName()) &&
-                                EuclideanDistance.calculateDistanceBetweenPoints(tokenClass, token) <= maxDistanceOcr);
+        tokenSetOcr.forEach(token -> {
+                boolean match = tokenSetClass.stream().anyMatch(tokenClass -> (
+                        tokenClass.getTokeName().contains(token.getTokeName()) && EuclideanDistance.calculateDistanceBetweenPoints(tokenClass, token) <= maxDistanceOcr
+                        ));
                 if (match){
                     numberOfFoundToken.incrementAndGet();
                 }
         });
         return "\nClass: " + classname.split("\\.")[0] + " "
-                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundToken.get()/(double) totalTokens)
-                + "\nNumber of found tokens within document: " + numberOfFoundToken.get() + "\nNumber of total tokens in class: " + totalTokens
+                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundToken.get()/(double) tokenSetClass.size())
+                + "\nNumber of found tokens within document: " + numberOfFoundToken.get() + "\nNumber of total tokens in class: " + tokenSetClass.size()
                 + "\n---\n\n";
     }
 
@@ -53,14 +54,14 @@ public class Prediction {
     /**
      * Predicting a given document based on the token lists of the classes.
      * @param document      Given document
-     * @param classname     The classname of {@tokenListClass}
-     * @param tokenList     Included tokens in the class
+     * @param classname     The classname of {@tokenSetClass}
+     * @param tokenSetClass Included tokens in the class
      * @return              Returns the relative frequency of the found tokens in the document
      */
-    public String predict(PDDocument document, String classname, List<Token> tokenList) {
+    public String predict(PDDocument document, String classname, HashSet<Token> tokenSetClass) {
 
         AtomicInteger numberOfFoundTokens = new AtomicInteger();
-        tokenList.forEach(token -> {
+        tokenSetClass.forEach(token -> {
             for (int page = 1; page <= document.getNumberOfPages(); page++) {
             List<TextPositionSequence> hits = findWord(document, page, token.getTokeName());
             hits.forEach(hit -> {
@@ -71,8 +72,8 @@ public class Prediction {
             });
         }});
         return "\nClass: " + classname.split("\\.")[0] + " "
-                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundTokens.get()/(double) tokenList.size())
-                + "\nNumber of found tokens within document: " + numberOfFoundTokens.get() + "\nNumber of total tokens in class: " + tokenList.size()
+                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundTokens.get()/(double) tokenSetClass.size())
+                + "\nNumber of found tokens within document: " + numberOfFoundTokens.get() + "\nNumber of total tokens in class: " + tokenSetClass.size()
                 + "\n---\n\n";
     }
 
@@ -86,7 +87,7 @@ public class Prediction {
     static List<TextPositionSequence> findWord(PDDocument document, int page, String searchWord)
     {
         final List<TextPosition> allTextPositions = new ArrayList<>();
-        PDFTextStripper stripper = null;
+        PDFTextStripper stripper;
         try {
             stripper = new PDFTextStripper()
             {

@@ -19,8 +19,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -44,13 +43,13 @@ public class OcrProcessor {
      * @param doc   Given document
      * @return      True: No font occurs in the document. False: Font occurs in the document.
      */
-    public boolean checkForOcr(PDDocument doc) {
+    public boolean isReadable(PDDocument doc) {
 
         PDPage page = doc.getPage(0); // 0 based
         PDResources resources = page.getResources();
         AtomicInteger number= new AtomicInteger();
         resources.getFontNames().iterator().forEachRemaining(font -> number.getAndIncrement());
-        return number.get() == 0;
+        return number.get() != 0;
     }
 
     /**
@@ -59,7 +58,7 @@ public class OcrProcessor {
      * @return              List of {@link Token}
      * @throws IOException  OCR processing does not work
      */
-    public List<Token> doOcr(PDDocument document) throws IOException {
+    public HashSet<Token> doOcr(PDDocument document) throws IOException {
 
         long start = System.currentTimeMillis();
         ITesseract it = new Tesseract();
@@ -70,7 +69,7 @@ public class OcrProcessor {
         it.setPageSegMode(1);
         it.setOcrEngineMode(1);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
-        List<Token> tokenList = new ArrayList<>();
+        HashSet<Token> tokenList = new HashSet<>();
 
         for (int page = 0; page < document.getNumberOfPages(); page++) {
             BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
