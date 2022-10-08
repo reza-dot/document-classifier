@@ -1,5 +1,6 @@
 package de.reza.documentclassifier.classification;
 
+import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.pdfutils.TextPositionSequence;
 import de.reza.documentclassifier.utils.EuclideanDistance;
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @Slf4j
-public class Prediction {
+public class Classifier {
 
     @Value("${MAX_DISTANCE}")
     private int maxDistance;
@@ -27,13 +28,13 @@ public class Prediction {
     private int maxDistanceOcr;
 
     /**
-     * Predicting a given token list based on the token lists of a class.
+     * Predicting a given token set based on the token set of a class.
      * @param tokenSetOcr       Set of recognized tokens by OCR from the given document
      * @param classname         The classname of {@tokenSetClass}
      * @param tokenSetClass     Included tokens in the class
      * @return                  Returns the relative frequency of the found tokens in the document
      */
-    public String predict(HashSet<Token> tokenSetOcr, String classname, HashSet<Token> tokenSetClass){
+    public Prediction predict(HashSet<Token> tokenSetOcr, String classname, HashSet<Token> tokenSetClass){
 
         AtomicInteger numberOfFoundToken = new AtomicInteger();
         tokenSetOcr.forEach(token -> {
@@ -44,21 +45,18 @@ public class Prediction {
                     numberOfFoundToken.incrementAndGet();
                 }
         });
-        return "\nClass: " + classname.split("\\.")[0] + " "
-                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundToken.get()/(double) tokenSetClass.size())
-                + "\nNumber of found tokens within document: " + numberOfFoundToken.get() + "\nNumber of total tokens in class: " + tokenSetClass.size()
-                + "\n---\n\n";
+        return new Prediction(classname, numberOfFoundToken.get(), tokenSetClass.size());
     }
 
 
     /**
-     * Predicting a given document based on the token lists of the classes.
+     * Predicting a given document based on the token set of the class.
      * @param document      Given document
      * @param classname     The classname of {@tokenSetClass}
      * @param tokenSetClass Included tokens in the class
      * @return              Returns the relative frequency of the found tokens in the document
      */
-    public String predict(PDDocument document, String classname, HashSet<Token> tokenSetClass) {
+    public Prediction predict(PDDocument document, String classname, HashSet<Token> tokenSetClass) {
 
         AtomicInteger numberOfFoundTokens = new AtomicInteger();
         tokenSetClass.forEach(token -> {
@@ -71,10 +69,7 @@ public class Prediction {
                 }
             });
         }});
-        return "\nClass: " + classname.split("\\.")[0] + " "
-                + "\nProbability of class: " +String.format("%.2f",(double) numberOfFoundTokens.get()/(double) tokenSetClass.size())
-                + "\nNumber of found tokens within document: " + numberOfFoundTokens.get() + "\nNumber of total tokens in class: " + tokenSetClass.size()
-                + "\n---\n\n";
+        return new Prediction(classname, numberOfFoundTokens.get(), tokenSetClass.size());
     }
 
     /**

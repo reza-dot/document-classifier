@@ -1,7 +1,8 @@
 package de.reza.documentclassifier.rest;
 
-import de.reza.documentclassifier.classification.Prediction;
+import de.reza.documentclassifier.classification.Classifier;
 import de.reza.documentclassifier.classification.Training;
+import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
 import de.reza.documentclassifier.ocrutils.OcrProcessor;
@@ -22,12 +23,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Controller {
 
     DatasetProcessor datasetProcessor;
-    Prediction predictor;
+    Classifier predictor;
     Training trainer;
     XmlProcessor xmlProcessor;
     OcrProcessor ocrProcessor;
     
-    public Controller(DatasetProcessor datasetProcessor, Prediction predicter, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor){
+    public Controller(DatasetProcessor datasetProcessor, Classifier predicter, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor){
         this.datasetProcessor = datasetProcessor;
         this.predictor = predicter;
         this.trainer = trainer;
@@ -46,39 +47,33 @@ public class Controller {
     }
 
     @GetMapping("/api/predict/{uuid}")
-    public String predict(@PathVariable("uuid") @NonNull String uuid, @RequestParam("document") @NonNull Optional<MultipartFile> file)  {
+    public List<Prediction> predict(@PathVariable("uuid") @NonNull String uuid, @RequestParam("document") @NonNull MultipartFile file)  {
 
-        PDDocument document;
-        try {
-            document = PDDocument.load(file.get().getInputStream());
+        try
+        {
+            PDDocument document = PDDocument.load(file.getInputStream());
             Optional<File[]> files = Optional.ofNullable(new File("models/" + uuid).listFiles());
-
             Map<String, HashSet<Token>> allClasses = new HashMap<>();
-            for (File xmlFile : files.get()) {
+            files.ifPresent(xmlFiles -> Arrays.stream(xmlFiles).toList().forEach(xmlFile -> {
                 allClasses.put(xmlFile.getName(), xmlProcessor.readXmlFile(xmlFile));
-            }
 
-            String[] probabilities = new String[files.get().length];
-            AtomicInteger counter = new AtomicInteger();
-
+            }));
+            List<Prediction> predictions = new ArrayList<>();
             if (!ocrProcessor.isReadable(document)) {
                 HashSet<Token> tokenListOcr = ocrProcessor.doOcr(document);
-                for (Map.Entry<String, HashSet<Token>> entry : allClasses.entrySet()) {
-                    probabilities[counter.get()] = predictor.predict(tokenListOcr, entry.getKey(), entry.getValue());
-                    counter.incrementAndGet();
-                }
+                allClasses.forEach((classname, tokenSetClass) -> {
+                    predictions.add(predictor.predict(tokenListOcr, classname, tokenSetClass));
+                });
             } else {
-
-                for (Map.Entry<String, HashSet<Token>> entry : allClasses.entrySet()) {
-                    probabilities[counter.get()] = predictor.predict(document, entry.getKey(), entry.getValue());
-                    counter.incrementAndGet();
-                }
+                allClasses.forEach((classname, tokenSetClass) -> {
+                    predictions.add(predictor.predict(document, classname, tokenSetClass));
+                });
             }
             document.close();
-            return Arrays.toString(probabilities);
+            return predictions;
         } catch (IOException e) {
-            log.error("No file provided");
-            return "No file provided";
+            log.error("Not supported filetype");
+            return null;
         }
     }
 }
