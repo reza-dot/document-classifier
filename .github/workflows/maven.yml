@@ -22,3 +22,5 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - environment:
+        - TESSDATA.PREFIX="/usr/share/tessdata/deu.traineddata"

@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.test.context.TestPropertySource;
+
 import java.io.IOException;
 import java.util.HashSet;
 
@@ -47,6 +49,5 @@ public class OcrIntegrationTest {
         Assertions.assertEquals(tokenSetClass.size(), tokenSet.size());
         Prediction probability =  predictor.predict(tokenSet, "Test", tokenSetClass);
         Assertions.assertEquals(1.0, probability.getProbability());
-        log.info(probability.toString());
     }
 }
