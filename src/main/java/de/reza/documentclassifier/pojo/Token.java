@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
 @AllArgsConstructor
+@Data
 @Builder
 public class Token {
 

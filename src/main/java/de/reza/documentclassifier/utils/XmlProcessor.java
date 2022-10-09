@@ -97,9 +97,9 @@ public class XmlProcessor {
             doc.getDocumentElement().normalize();
             NodeList nList = doc.getElementsByTagName("token");
 
-            for (int temp = 0; temp < nList.getLength(); temp++) {
+            for (int i = 0; i < nList.getLength(); i++) {
 
-                Node nNode = nList.item(temp);
+                Node nNode = nList.item(i);
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
                     String tokenName =  eElement

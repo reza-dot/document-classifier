@@ -15,13 +15,13 @@ RUN ./mvnw package
 
 # Second (and final) stage starts here. All intermediate stages are deleted after build.
 FROM eclipse-temurin:17-jre
-WORKDIR /app
+
 RUN apt-get update
 RUN apt-get -y install tesseract-ocr
-
-# Download last language package
-RUN mkdir -p /usr/share/tessdata
-ADD https://github.com/tesseract-ocr/tessdata/blob/main/deu.traineddata /usr/share/tessdata/deu.traineddata
+RUN ldconfig
+RUN tesseract --list-langs
+RUN tesseract -v
+WORKDIR /app
 
 EXPOSE 8080
 COPY --from=build /app/target/document-classifier-0.0.1-SNAPSHOT.jar ./
