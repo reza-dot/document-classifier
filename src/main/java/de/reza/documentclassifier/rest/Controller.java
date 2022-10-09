@@ -16,21 +16,20 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @Slf4j
 public class Controller {
 
     DatasetProcessor datasetProcessor;
-    Classifier predictor;
+    Classifier classifier;
     Training trainer;
     XmlProcessor xmlProcessor;
     OcrProcessor ocrProcessor;
     
-    public Controller(DatasetProcessor datasetProcessor, Classifier predicter, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor){
+    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor){
         this.datasetProcessor = datasetProcessor;
-        this.predictor = predicter;
+        this.classifier = classifier;
         this.trainer = trainer;
         this.xmlProcessor = xmlProcessor;
         this.ocrProcessor = ocrProcessor;
@@ -51,6 +50,7 @@ public class Controller {
 
         try
         {
+            long start = System.currentTimeMillis();
             PDDocument document = PDDocument.load(file.getInputStream());
             Optional<File[]> files = Optional.ofNullable(new File("models/" + uuid).listFiles());
             Map<String, HashSet<Token>> allClasses = new HashMap<>();
@@ -62,14 +62,15 @@ public class Controller {
             if (!ocrProcessor.isReadable(document)) {
                 HashSet<Token> tokenListOcr = ocrProcessor.doOcr(document);
                 allClasses.forEach((classname, tokenSetClass) -> {
-                    predictions.add(predictor.predict(tokenListOcr, classname, tokenSetClass));
+                    predictions.add(classifier.predict(tokenListOcr, classname, tokenSetClass));
                 });
             } else {
                 allClasses.forEach((classname, tokenSetClass) -> {
-                    predictions.add(predictor.predict(document, classname, tokenSetClass));
+                    predictions.add(classifier.predict(document, classname, tokenSetClass));
                 });
             }
             document.close();
+            log.info("time = {} milliseconds", (System.currentTimeMillis() - start));
             return predictions;
         } catch (IOException e) {
             log.error("Not supported filetype");

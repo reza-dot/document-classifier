@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.Word;
 import net.sourceforge.tess4j.util.LoadLibs;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -27,9 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 @Slf4j
 public class OcrProcessor {
-
-    @Value("${TESSDATA_PREFIX}")
-    private String tessdata;
 
     @Value("${SCALE_FACTOR_X}")
     private double scaleFactorX;
@@ -62,30 +58,27 @@ public class OcrProcessor {
      */
     public HashSet<Token> doOcr(PDDocument document) throws IOException {
 
-        long start = System.currentTimeMillis();
-        ITesseract it = new Tesseract();
-        File tessDataFolder = LoadLibs.extractTessResources(tessdata);
-        it.setDatapath(tessDataFolder.getAbsolutePath());
-        it.setLanguage("deu");
-        it.setVariable("user_defined_dpi", String.valueOf(dpi));
-        it.setPageSegMode(1);
-        it.setOcrEngineMode(1);
+        ITesseract instance = new Tesseract();
+        File tessDataFolder = LoadLibs.extractTessResources("tessdata");
+        instance.setDatapath(tessDataFolder.getPath());
+        instance.setLanguage("deu");
+        instance.setVariable("user_defined_dpi", String.valueOf(dpi));
+        instance.setPageSegMode(ITessAPI.TessOcrEngineMode.OEM_TESSERACT_LSTM_COMBINED);
+        instance.setOcrEngineMode(ITessAPI.TessPageSegMode.PSM_AUTO_OSD);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         HashSet<Token> tokenSet = new HashSet<>();
 
         for (int page = 0; page < document.getNumberOfPages(); page++) {
             BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
-
-            for (Word word : it.getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD)) {
+            instance.getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD).forEach(word -> {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
                     Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
                     tokenSet.add(new Token(word.getText(), round(boundingBox.getX()) * scaleFactorX,  round(boundingBox.getY()) * scaleFactorY, round(boundingBox.getWidth())));
                     log.info("Token: [" + word.getText() + "] X= " + round(boundingBox.getX()) * scaleFactorX + " Y= " + round(boundingBox.getY()) * scaleFactorY + " Width=" + round(boundingBox.getWidth()) + " Height=" + boundingBox.getHeight());
                 }
-            }
+            });
         }
-        log.info("time = {} milliseconds", (System.currentTimeMillis() - start));
         return tokenSet;
     }
 
