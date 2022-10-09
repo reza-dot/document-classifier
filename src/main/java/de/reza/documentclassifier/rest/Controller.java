@@ -2,6 +2,7 @@ package de.reza.documentclassifier.rest;
 
 import de.reza.documentclassifier.classification.Classifier;
 import de.reza.documentclassifier.classification.Training;
+import de.reza.documentclassifier.pdfutils.PdfProcessor;
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
@@ -13,8 +14,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @RestController
@@ -26,18 +26,21 @@ public class Controller {
     Training trainer;
     XmlProcessor xmlProcessor;
     OcrProcessor ocrProcessor;
+
+    PdfProcessor pdfProcessor;
     
-    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor){
+    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor, PdfProcessor pdfProcessor){
         this.datasetProcessor = datasetProcessor;
         this.classifier = classifier;
         this.trainer = trainer;
         this.xmlProcessor = xmlProcessor;
         this.ocrProcessor = ocrProcessor;
+        this.pdfProcessor = pdfProcessor;
     }
 
 
     @PostMapping("/api/train")
-    public String training(@RequestParam("dataset")@NonNull MultipartFile file) {
+    public String training(@RequestParam("dataset")@NonNull MultipartFile file) throws IOException {
 
         String uuid = UUID.randomUUID().toString();
         String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
@@ -60,13 +63,14 @@ public class Controller {
             }));
             List<Prediction> predictions = new ArrayList<>();
             if (!ocrProcessor.isReadable(document)) {
-                HashSet<Token> tokenListOcr = ocrProcessor.doOcr(document);
+                HashSet<Token> tokenSetOcr = ocrProcessor.doOcr(document);
                 allClasses.forEach((classname, tokenSetClass) -> {
-                    predictions.add(classifier.predict(tokenListOcr, classname, tokenSetClass));
+                    predictions.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false));
                 });
             } else {
+                HashSet<Token> tokenSetPdf = pdfProcessor.getTokensFromPdf(document);
                 allClasses.forEach((classname, tokenSetClass) -> {
-                    predictions.add(classifier.predict(document, classname, tokenSetClass));
+                    predictions.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true));
                 });
             }
             document.close();
