@@ -4,10 +4,9 @@ import de.reza.documentclassifier.classification.Classifier;
 import de.reza.documentclassifier.ocrutils.OcrProcessor;
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
-import lombok.extern.slf4j.Slf4j;;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -29,7 +28,6 @@ public class OcrIntegrationTest {
 
     /**
      * Checks if PDF document is searchable, in order to extract and tokenize the texts from the image document in the next step.
-     * @throws IOException
      */
     //@Test
     public void readTextFromImage() throws IOException {
@@ -47,7 +45,7 @@ public class OcrIntegrationTest {
         tokenSetClass.add(new Token("OCR", 354, 280, 118));
         tokenSetClass.add(new Token("funktioniert", 141, 367, 406));
         Assertions.assertEquals(tokenSetClass.size(), tokenSet.size());
-        Prediction probability =  predictor.predict(tokenSet, "Test", tokenSetClass);
+        Prediction probability =  predictor.predict(tokenSet, "Test", tokenSetClass, false);
         Assertions.assertEquals(1.0, probability.getProbability());
     }
 }
