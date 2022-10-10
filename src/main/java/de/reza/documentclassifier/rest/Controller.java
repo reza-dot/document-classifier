@@ -7,7 +7,7 @@ import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
 import de.reza.documentclassifier.ocrutils.OcrProcessor;
-import de.reza.documentclassifier.utils.XmlProcessor;
+import de.reza.documentclassifier.utils.JsonProcessor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -24,23 +24,23 @@ public class Controller {
     DatasetProcessor datasetProcessor;
     Classifier classifier;
     Training trainer;
-    XmlProcessor xmlProcessor;
     OcrProcessor ocrProcessor;
-
     PdfProcessor pdfProcessor;
     
-    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, XmlProcessor xmlProcessor, OcrProcessor ocrProcessor, PdfProcessor pdfProcessor){
+    JsonProcessor jsonProcessor;
+    
+    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, OcrProcessor ocrProcessor, PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
         this.datasetProcessor = datasetProcessor;
         this.classifier = classifier;
         this.trainer = trainer;
-        this.xmlProcessor = xmlProcessor;
         this.ocrProcessor = ocrProcessor;
         this.pdfProcessor = pdfProcessor;
+        this.jsonProcessor = jsonProcessor;
     }
 
 
     @PostMapping("/api/train")
-    public String training(@RequestParam("dataset")@NonNull MultipartFile file) throws IOException {
+    public String training(@RequestParam("dataset")@NonNull MultipartFile file) {
 
         String uuid = UUID.randomUUID().toString();
         String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
@@ -57,21 +57,14 @@ public class Controller {
             PDDocument document = PDDocument.load(file.getInputStream());
             Optional<File[]> files = Optional.ofNullable(new File("models/" + uuid).listFiles());
             Map<String, HashSet<Token>> allClasses = new HashMap<>();
-            files.ifPresent(xmlFiles -> Arrays.stream(xmlFiles).toList().forEach(xmlFile -> {
-                allClasses.put(xmlFile.getName(), xmlProcessor.readXmlFile(xmlFile));
-
-            }));
+            files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
             List<Prediction> predictions = new ArrayList<>();
             if (!ocrProcessor.isReadable(document)) {
                 HashSet<Token> tokenSetOcr = ocrProcessor.doOcr(document);
-                allClasses.forEach((classname, tokenSetClass) -> {
-                    predictions.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false));
-                });
+                allClasses.forEach((classname, tokenSetClass) -> predictions.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false)));
             } else {
                 HashSet<Token> tokenSetPdf = pdfProcessor.getTokensFromPdf(document);
-                allClasses.forEach((classname, tokenSetClass) -> {
-                    predictions.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true));
-                });
+                allClasses.forEach((classname, tokenSetClass) -> predictions.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true)));
             }
             document.close();
             log.info("time = {} milliseconds", (System.currentTimeMillis() - start));

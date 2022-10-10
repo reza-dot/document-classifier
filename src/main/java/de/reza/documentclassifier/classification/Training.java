@@ -2,7 +2,7 @@ package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pdfutils.PdfProcessor;
 import de.reza.documentclassifier.pojo.Token;
-import de.reza.documentclassifier.utils.XmlProcessor;
+import de.reza.documentclassifier.utils.JsonProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.stereotype.Service;
@@ -16,14 +16,13 @@ import java.util.*;
 @Slf4j
 public class Training {
 
-
-    XmlProcessor xmlProcessor;
-
     PdfProcessor pdfProcessor;
 
-    public Training(XmlProcessor xmlProcessor, PdfProcessor pdfProcessor){
-        this.xmlProcessor = xmlProcessor;
+    JsonProcessor jsonProcessor;
+
+    public Training(PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
         this.pdfProcessor = pdfProcessor;
+        this.jsonProcessor = jsonProcessor;
     }
 
     /**
@@ -40,7 +39,7 @@ public class Training {
             try {
                 HashSet<Token> tokenSet = pdfProcessor.getTokensFromPdf(PDDocument.load(pdfFile));
                 String fileNameWithoutExtension = pdfFile.getName().substring(0, pdfFile.getName().lastIndexOf('.'));
-                xmlProcessor.generateTokenXmlFile(tokenSet, uuid, fileNameWithoutExtension);
+                jsonProcessor.createJsonFile(tokenSet, uuid, fileNameWithoutExtension);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

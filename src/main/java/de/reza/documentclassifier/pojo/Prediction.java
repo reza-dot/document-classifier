@@ -1,9 +1,11 @@
 package de.reza.documentclassifier.pojo;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Data
-public class Prediction {
+@AllArgsConstructor
+@Getter
+public final class Prediction {
 
     private String classname;
 
