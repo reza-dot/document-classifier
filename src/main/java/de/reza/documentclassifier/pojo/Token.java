@@ -1,13 +1,13 @@
 package de.reza.documentclassifier.pojo;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+
 
 @AllArgsConstructor
-@Data
-@Builder
-public class Token {
+@Getter
+@Setter
+@NoArgsConstructor
+public final class Token {
 
     private String tokeName;
 

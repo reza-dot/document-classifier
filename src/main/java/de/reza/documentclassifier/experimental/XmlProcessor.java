@@ -1,8 +1,7 @@
-package de.reza.documentclassifier.utils;
+package de.reza.documentclassifier.experimental;
 
 import de.reza.documentclassifier.pojo.Token;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,11 +17,11 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
-@Service
+//@Service
 @Slf4j
 public class XmlProcessor {
 
-    /**
+    /** ATTENTION old approach for retrieving tokens from xml files. xml is slow & cumbersome... json > xml :)
      * Creates an XML file with the recognized {@link Token}.
      * Syntax of XML-File:
      * <tokenSet>
@@ -121,14 +120,7 @@ public class XmlProcessor {
                             .getElementsByTagName("width")
                             .item(0)
                             .getTextContent();
-
-                    Token tmpToken = Token.builder()
-                            .tokeName(tokenName)
-                            .xAxis(Double.parseDouble(xAxis))
-                            .yAxis(Double.parseDouble(yAxis))
-                            .width(Double.parseDouble(width))
-                            .build();
-                    tokenSet.add(tmpToken);
+                    tokenSet.add(new Token(tokenName, Double.parseDouble(xAxis), Double.parseDouble(yAxis), Double.parseDouble(width)));
                 }
             }
             return tokenSet;
