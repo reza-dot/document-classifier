@@ -1,7 +1,7 @@
 package de.reza.documentclassifier;
 
 import de.reza.documentclassifier.classification.Classifier;
-import de.reza.documentclassifier.ocrutils.OcrProcessor;
+import de.reza.documentclassifier.utils.OcrProcessor;
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import lombok.extern.slf4j.Slf4j;

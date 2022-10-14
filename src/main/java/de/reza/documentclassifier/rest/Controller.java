@@ -6,7 +6,7 @@ import de.reza.documentclassifier.pdfutils.PdfProcessor;
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
-import de.reza.documentclassifier.ocrutils.OcrProcessor;
+import de.reza.documentclassifier.utils.OcrProcessor;
 import de.reza.documentclassifier.utils.JsonProcessor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,6 @@ public class Controller {
     Training trainer;
     OcrProcessor ocrProcessor;
     PdfProcessor pdfProcessor;
-    
     JsonProcessor jsonProcessor;
     
     public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, OcrProcessor ocrProcessor, PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
@@ -67,10 +66,10 @@ public class Controller {
                 allClasses.forEach((classname, tokenSetClass) -> predictions.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true)));
             }
             document.close();
-            log.info("time = {} milliseconds", (System.currentTimeMillis() - start));
+            log.info("computing time = {} milliseconds", (System.currentTimeMillis() - start));
             return predictions;
         } catch (IOException e) {
-            log.error("Not supported filetype");
+            log.error("Not supported filetype or no file provided");
             return null;
         }
     }

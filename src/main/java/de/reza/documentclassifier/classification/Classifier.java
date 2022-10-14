@@ -6,8 +6,10 @@ import de.reza.documentclassifier.utils.EuclideanDistance;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import java.util.*;
+
+import static java.util.Comparator.comparingDouble;
 
 @Service
 @Slf4j
@@ -34,15 +36,22 @@ public class Classifier {
         else {
             distance = maxDistanceOcr;
         }
-        AtomicInteger numberOfFoundToken = new AtomicInteger();
-        tokenSetOcr.forEach(token -> {
-                boolean match = tokenSetClass.stream().anyMatch(tokenClass -> (
-                        tokenClass.getTokeName().contains(token.getTokeName()) && EuclideanDistance.calculateDistanceBetweenPoints(tokenClass, token) <= distance
-                        ));
-                if (match){
-                    numberOfFoundToken.incrementAndGet();
+        List<Token> foundTokens = new ArrayList<>();
+        tokenSetClass.forEach(tokenClass -> {
+
+            HashMap<Token, Double> allMatches = new HashMap<>();
+            tokenSetOcr.forEach(tokenPdf -> {
+                if(tokenPdf.getTokeName().contains(tokenClass.getTokeName()) && EuclideanDistance.calculateDistanceBetweenPoints(tokenPdf, tokenClass) <= distance){
+                    allMatches.put(tokenPdf, EuclideanDistance.calculateDistanceBetweenPoints(tokenPdf, tokenClass));
                 }
+            } );
+
+            if(allMatches.size()!=0) {
+                Token tokenWithLowestDistance= Collections.min(allMatches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
+                foundTokens.add(tokenWithLowestDistance);
+            }
+
         });
-        return new Prediction(classname, numberOfFoundToken.get(), tokenSetClass.size());
+        return new Prediction(classname, foundTokens.size(), tokenSetClass.size());
     }
 }
