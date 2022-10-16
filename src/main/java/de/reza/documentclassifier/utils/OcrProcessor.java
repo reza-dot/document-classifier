@@ -20,7 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -47,7 +48,7 @@ public class OcrProcessor {
         PDResources resources = page.getResources();
         AtomicInteger number= new AtomicInteger();
         resources.getFontNames().iterator().forEachRemaining(font -> number.getAndIncrement());
-        return number.get() == 0 ? false : true;
+        return number.get() != 0 ? false : true;
     }
 
     /**
@@ -56,7 +57,7 @@ public class OcrProcessor {
      * @return              List of {@link Token}
      * @throws IOException  OCR processing does not work
      */
-    public HashSet<Token> doOcr(PDDocument document) throws IOException {
+    public List<Token> doOcr(PDDocument document) throws IOException {
 
         ITesseract instance = new Tesseract();
         File tessDataFolder = LoadLibs.extractTessResources("tessdata");
@@ -66,7 +67,7 @@ public class OcrProcessor {
         instance.setPageSegMode(ITessAPI.TessOcrEngineMode.OEM_TESSERACT_LSTM_COMBINED);
         instance.setOcrEngineMode(ITessAPI.TessPageSegMode.PSM_AUTO_OSD);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
-        HashSet<Token> tokenSet = new HashSet<>();
+        List<Token> tokenSet = new ArrayList<>();
 
         for (int page = 0; page < document.getNumberOfPages(); page++) {
             BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
@@ -74,7 +75,7 @@ public class OcrProcessor {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
                     Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
-                    tokenSet.add(new Token(word.getText(), round(boundingBox.getX()) * scaleFactorX,  round(boundingBox.getY()) * scaleFactorY, round(boundingBox.getWidth())));
+                    tokenSet.add(new Token(word.getText(), round(boundingBox.getX()) * scaleFactorX,  round(boundingBox.getY()) * scaleFactorY));
                     log.info("Token: [" + word.getText() + "] X= " + round(boundingBox.getX()) * scaleFactorX + " Y= " + round(boundingBox.getY()) * scaleFactorY + " Width=" + round(boundingBox.getWidth()) + " Height=" + boundingBox.getHeight());
                 }
             });

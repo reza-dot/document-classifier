@@ -14,8 +14,8 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 //@Service
 @Slf4j
@@ -24,7 +24,7 @@ public class XmlProcessor {
     /** ATTENTION old approach for retrieving tokens from xml files. xml is slow & cumbersome... json > xml :)
      * Creates an XML file with the recognized {@link Token}.
      * Syntax of XML-File:
-     * <tokenSet>
+     * <tokenList>
      * <token>
      * 		<tokenKey>...</tokenKey>
      * 		<xAxis>...</xAxis>
@@ -32,21 +32,21 @@ public class XmlProcessor {
      * 		<width>...</width>
      * 	</token>
      * 	...
-     * 	</tokenSet>
-     * @param tokenSet         List of {@link Token}
+     * 	</tokenList>
+     * @param tokenList         List of {@link Token}
      * @param uuid              UUID of the model
      * @param filename          Name of the class within the model
      */
-    public void generateTokenXmlFile(Set<Token> tokenSet, String uuid, String filename) {
+    public void generateTokenXmlFile(List<Token> tokenList, String uuid, String filename) {
 
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dbuilder = dbFactory.newDocumentBuilder();
             Document document = dbuilder.newDocument();
-            Element tokens = document.createElement("tokenSet");
+            Element tokens = document.createElement("tokenList");
             document.appendChild(tokens);
 
-            tokenSet.forEach(token-> {Element element = document.createElement("token");
+            tokenList.forEach(token-> {Element element = document.createElement("token");
                 tokens.appendChild(element);
 
                 Element tokenKey = document.createElement("tokenKey");
@@ -60,10 +60,7 @@ public class XmlProcessor {
                 Element yAxis = document.createElement("yAxis");
                 yAxis.appendChild(document.createTextNode(String.valueOf(token.getYAxis())));
                 element.appendChild(yAxis);
-
-                Element width = document.createElement("width");
-                width.appendChild(document.createTextNode(String.valueOf(token.getWidth())));
-                element.appendChild(width);});
+            });
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
@@ -83,12 +80,12 @@ public class XmlProcessor {
      * @param xmlFile   XML file within the model
      * @return          list of all Tokens within the XML file
      */
-    public HashSet<Token> readXmlFile(File xmlFile){
+    public List<Token> readXmlFile(File xmlFile){
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         try (InputStream is = new FileInputStream(xmlFile)) {
 
-            HashSet<Token> tokenSet = new HashSet<>();
+            List<Token> tokenList = new ArrayList<>();
 
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(is);
@@ -115,15 +112,10 @@ public class XmlProcessor {
                             .getElementsByTagName("yAxis")
                             .item(0)
                             .getTextContent();
-
-                    String width =  eElement
-                            .getElementsByTagName("width")
-                            .item(0)
-                            .getTextContent();
-                    tokenSet.add(new Token(tokenName, Double.parseDouble(xAxis), Double.parseDouble(yAxis), Double.parseDouble(width)));
+                    tokenList.add(new Token(tokenName, Double.parseDouble(xAxis), Double.parseDouble(yAxis)));
                 }
             }
-            return tokenSet;
+            return tokenList;
         } catch (Exception e) {
             return null;
         }

@@ -13,7 +13,8 @@ import org.springframework.core.io.ClassPathResource;
 
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,15 +36,15 @@ public class OcrIntegrationTest {
         assertTrue(classPathResource.getFile().exists());
         PDDocument document = PDDocument.load(classPathResource.getInputStream());
         assertFalse(ocrProcessor.isReadable(document));
-        HashSet<Token> tokenSet = ocrProcessor.doOcr(document);
-        HashSet<Token> tokenSetClass = new HashSet<>();
-        tokenSetClass.add(new Token("Das", 71, 74, 32));
-        tokenSetClass.add(new Token("ist", 179, 99, 78));
-        tokenSetClass.add(new Token("nur", 212, 175, 28));
-        tokenSetClass.add(new Token("ein", 283, 225, 79));
-        tokenSetClass.add(new Token("Test", 306, 227, 43));
-        tokenSetClass.add(new Token("OCR", 354, 280, 118));
-        tokenSetClass.add(new Token("funktioniert", 141, 367, 406));
+        List<Token> tokenSet = ocrProcessor.doOcr(document);
+        List<Token> tokenSetClass = new ArrayList<>();
+        tokenSetClass.add(new Token("Das", 71, 74));
+        tokenSetClass.add(new Token("ist", 179, 99));
+        tokenSetClass.add(new Token("nur", 212, 175));
+        tokenSetClass.add(new Token("ein", 283, 225));
+        tokenSetClass.add(new Token("Test", 306, 227));
+        tokenSetClass.add(new Token("OCR", 354, 280));
+        tokenSetClass.add(new Token("funktioniert", 141, 367));
         Assertions.assertEquals(tokenSetClass.size(), tokenSet.size());
         Prediction probability =  predictor.predict(tokenSet, "Test", tokenSetClass, false);
         Assertions.assertEquals(1.0, probability.getProbability());

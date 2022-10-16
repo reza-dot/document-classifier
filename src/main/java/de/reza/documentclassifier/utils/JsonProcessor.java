@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -17,7 +16,7 @@ public class JsonProcessor {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public void createJsonFile(Set<Token> tokenSet, String uuid, String filename){
+    public void createJsonFile(List<Token> tokenSet, String uuid, String filename){
 
         try {
             log.info("JSON file created: {}", filename);
@@ -27,7 +26,7 @@ public class JsonProcessor {
         }
     }
 
-     public HashSet<Token> readJsonFile(File jsonFile){
+     public List<Token> readJsonFile(File jsonFile){
          try {
              return objectMapper.readValue(jsonFile, new TypeReference<>(){});
          } catch (IOException e) {

@@ -10,17 +10,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 
 @Slf4j
 public class GetTokenLocationAndSize extends PDFTextStripper {
 
-    private final HashSet<Token> tokenSet;
+    private final List<Token> tokenList;
 
-    public GetTokenLocationAndSize(HashSet<Token> tokenSet) throws IOException {
-        this.tokenSet = tokenSet;
+    public GetTokenLocationAndSize(List<Token> tokenList) throws IOException {
+        this.tokenList = tokenList;
     }
 
 
@@ -56,7 +55,7 @@ public class GetTokenLocationAndSize extends PDFTextStripper {
             token.append(text.getUnicode());
         }
         log.info("Token [{}]X= {} Y={} width={}", token, round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth()));
-        tokenSet.add(new Token(token.toString(), round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth())));
+        tokenList.add(new Token(token.toString(), round(boundingBox.getX()), round(boundingBox.getY())));
     }
 
     protected double round(double round){

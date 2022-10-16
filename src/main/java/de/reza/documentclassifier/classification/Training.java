@@ -37,9 +37,9 @@ public class Training {
 
         files.ifPresent(pdfFiles -> Arrays.stream(pdfFiles).toList().forEach(pdfFile -> {
             try {
-                HashSet<Token> tokenSet = pdfProcessor.getTokensFromPdf(PDDocument.load(pdfFile));
+                List<Token> tokenList = pdfProcessor.getTokensFromPdf(PDDocument.load(pdfFile));
                 String fileNameWithoutExtension = pdfFile.getName().substring(0, pdfFile.getName().lastIndexOf('.'));
-                jsonProcessor.createJsonFile(tokenSet, uuid, fileNameWithoutExtension);
+                jsonProcessor.createJsonFile(tokenList, uuid, fileNameWithoutExtension);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
