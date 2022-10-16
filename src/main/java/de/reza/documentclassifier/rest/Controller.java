@@ -55,19 +55,19 @@ public class Controller {
             long start = System.currentTimeMillis();
             PDDocument document = PDDocument.load(file.getInputStream());
             Optional<File[]> files = Optional.ofNullable(new File("models/" + uuid).listFiles());
-            Map<String, HashSet<Token>> allClasses = new HashMap<>();
+            Map<String, List<Token>> allClasses = new HashMap<>();
             files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
-            List<Prediction> predictions = new ArrayList<>();
+            List<Prediction> predictionList = new ArrayList<>();
             if (!ocrProcessor.isReadable(document)) {
-                HashSet<Token> tokenSetOcr = ocrProcessor.doOcr(document);
-                allClasses.forEach((classname, tokenSetClass) -> predictions.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false)));
+                List<Token> tokenSetOcr = ocrProcessor.doOcr(document);
+                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false)));
             } else {
-                HashSet<Token> tokenSetPdf = pdfProcessor.getTokensFromPdf(document);
-                allClasses.forEach((classname, tokenSetClass) -> predictions.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true)));
+                List<Token> tokenSetPdf = pdfProcessor.getTokensFromPdf(document);
+                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true)));
             }
             document.close();
             log.info("computing time = {} milliseconds", (System.currentTimeMillis() - start));
-            return predictions;
+            return predictionList;
         } catch (IOException e) {
             log.error("Not supported filetype or no file provided");
             return null;

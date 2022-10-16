@@ -4,9 +4,10 @@ import lombok.*;
 
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
+@EqualsAndHashCode
 public final class Token {
 
     private String tokeName;
@@ -14,6 +15,4 @@ public final class Token {
     private double xAxis;
 
     private double yAxis;
-
-    private double width;
 }

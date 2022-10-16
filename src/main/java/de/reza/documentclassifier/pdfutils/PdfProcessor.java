@@ -9,7 +9,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class PdfProcessor {
@@ -20,9 +21,9 @@ public class PdfProcessor {
      * @return              list of all {@link Token}
      * @throws IOException  file is not valid
      */
-    public HashSet<Token> getTokensFromPdf(PDDocument document) throws IOException {
+    public List<Token> getTokensFromPdf(PDDocument document) throws IOException {
 
-        HashSet<Token> tokenSetPdf = new HashSet<>();
+        List<Token> tokenSetPdf = new ArrayList<>();
         try {
             PDFTextStripper stripper = new GetTokenLocationAndSize(tokenSetPdf);
             stripper.setSortByPosition(true);
