@@ -23,11 +23,11 @@ public class kNearestNeighborTest {
     @Test
     public void getTokenWithLowestDistance(){
 
-        Token token = new Token("A", 10, 15, 10);
+        Token token = new Token("A", 10, 15);
         HashMap<Token, Double> allMatches = new HashMap<>();
-        Token firstCandidate = new Token("A", 11, 12, 10);
+        Token firstCandidate = new Token("A", 11, 12);
         allMatches.put(firstCandidate, EuclideanDistance.calculateDistanceBetweenPoints(token, firstCandidate));
-        Token secondCandidate = new Token("A", 20, 25, 10);
+        Token secondCandidate = new Token("A", 20, 25);
         allMatches.put(firstCandidate, EuclideanDistance.calculateDistanceBetweenPoints(token, secondCandidate));
         Token tokenWithLowestDistance= Collections.min(allMatches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
         Assertions.assertEquals(
