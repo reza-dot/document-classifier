@@ -31,7 +31,7 @@ public class OcrIntegrationTest {
     /**
      * Checks if PDF document is searchable, in order to extract and tokenize the texts from the image document in the next step.
      */
-    @Test
+    //@Test
     public void readTextFromImage() throws IOException {
         ClassPathResource classPathResource = new ClassPathResource("test/Image_document_300_dpi.pdf");
         assertTrue(classPathResource.getFile().exists());
