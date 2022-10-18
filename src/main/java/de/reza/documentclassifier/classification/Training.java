@@ -1,18 +1,18 @@
 package de.reza.documentclassifier.classification;
 
-import de.reza.documentclassifier.pdfutils.PdfProcessor;
+import de.reza.documentclassifier.pdf.PdfProcessor;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.JsonProcessor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 
 import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 
-@Service
+@Component
 @Slf4j
 public class Training {
 
@@ -26,8 +26,8 @@ public class Training {
     }
 
     /**
-     * Recognizes tokens with their corresponding coordinates on the PDF document.
-     * Saves them as XML file in the next step as a class in the model.
+     * Recognizes tokens with their corresponding coordinates on a searchable PDF document.
+     * Saves this in the next step as a JSON file in the model
      * @param pathToTrainingFiles   PDF documents
      * @param uuid                  Identification number for a model
      */
@@ -37,7 +37,7 @@ public class Training {
 
         files.ifPresent(pdfFiles -> Arrays.stream(pdfFiles).toList().forEach(pdfFile -> {
             try {
-                List<Token> tokenList = pdfProcessor.getTokensFromPdf(PDDocument.load(pdfFile));
+                List<Token> tokenList = pdfProcessor.getTokensFromSearchablePdf(PDDocument.load(pdfFile));
                 String fileNameWithoutExtension = pdfFile.getName().substring(0, pdfFile.getName().lastIndexOf('.'));
                 jsonProcessor.createJsonFile(tokenList, uuid, fileNameWithoutExtension);
             } catch (IOException e) {

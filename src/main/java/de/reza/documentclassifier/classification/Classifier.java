@@ -2,16 +2,16 @@ package de.reza.documentclassifier.classification;
 
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
-import de.reza.documentclassifier.utils.EuclideanDistance;
+import de.reza.documentclassifier.utils.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 import static java.util.Comparator.comparingDouble;
 
-@Service
+@Component
 @Slf4j
 public class Classifier {
 
@@ -20,12 +20,18 @@ public class Classifier {
     @Value("${MAX_DISTANCE_OCR}")
     private int maxDistanceOcr;
 
+    private MathUtils mathUtils;
+
+    public Classifier(MathUtils mathUtils){
+        this.mathUtils = mathUtils;
+    }
+
     /**
-     * Predicting a given token set based on the token set of a class.
-     * @param tokenListOcr       Set of recognized tokens by OCR from the given document
+     * Predicting a given token list based on the token list of a class.
+     * @param tokenListOcr      list of recognized tokens by OCR from the given document
      * @param classname         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
-     * @return                  Returns the relative frequency of the found tokens in the document
+     * @return                  Returns {@link Prediction}
      */
     public Prediction predict(List<Token> tokenListOcr, String classname, List<Token> tokenListClass, boolean isReadable){
 
@@ -36,16 +42,16 @@ public class Classifier {
 
             HashMap<Token, Double> matches = new HashMap<>();
             tokenListOcr.forEach(tokenPdf -> {
-                if(tokenPdf.getTokeName().equals(tokenClass.getTokeName()) && EuclideanDistance.calculateDistanceBetweenPoints(tokenPdf, tokenClass) <= distance){
+                if(tokenPdf.getTokeName().equals(tokenClass.getTokeName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
-                    matches.put(tokenPdf, EuclideanDistance.calculateDistanceBetweenPoints(tokenPdf, tokenClass));
+                    matches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
                 }
             } );
 
             if(matches.size()!=0) {
 
                 Token tokenWithLowestDistance= Collections.min(matches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
-                double euclideanDistance = EuclideanDistance.calculateDistanceBetweenPoints(tokenWithLowestDistance, tokenClass);
+                double euclideanDistance = mathUtils.euclideanDistance(tokenWithLowestDistance, tokenClass);
                 if(foundTokens.containsKey(tokenWithLowestDistance)){
                     double distanceToken = foundTokens.get(tokenWithLowestDistance);
                     if(distanceToken > euclideanDistance){
@@ -59,8 +65,13 @@ public class Classifier {
         return new Prediction(classname, foundTokens.size(), tokenListClass.size());
     }
 
-    protected int getDistanceProfile(boolean isReadable){
-        if(isReadable){
+    /**
+     * Gets the correct distance based on whether the document is searchable or not
+     * @param isSearchable      searchability of the document
+     * @return                  distance profile
+     */
+    protected int getDistanceProfile(boolean isSearchable){
+        if(isSearchable){
             return maxDistance;
         }
         else {
