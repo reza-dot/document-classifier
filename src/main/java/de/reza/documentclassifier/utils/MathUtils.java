@@ -1,8 +1,13 @@
 package de.reza.documentclassifier.utils;
 
 import de.reza.documentclassifier.pojo.Token;
+import org.springframework.stereotype.Service;
 
-public class EuclideanDistance {
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+@Service
+public class MathUtils {
 
     /**
      * Calculates the distance between two points
@@ -10,7 +15,13 @@ public class EuclideanDistance {
      * @param token         Token of given document
      * @return              distance between two points
      */
-    public static double calculateDistanceBetweenPoints(Token tokenClass, Token token) {
+    public double euclideanDistance(Token tokenClass, Token token) {
         return Math.sqrt((tokenClass.getYAxis() - token.getYAxis()) * (tokenClass.getYAxis()- token.getYAxis()) + (tokenClass.getXAxis() - token.getXAxis()) * (tokenClass.getXAxis()  - token.getXAxis()));
+    }
+
+    public double round(double round){
+
+        BigDecimal bd = new BigDecimal(round).setScale(2, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }

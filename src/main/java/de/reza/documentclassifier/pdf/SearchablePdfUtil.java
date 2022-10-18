@@ -1,28 +1,36 @@
-package de.reza.documentclassifier.pdfutils;
+package de.reza.documentclassifier.pdf;
 
 import de.reza.documentclassifier.pojo.Token;
+import de.reza.documentclassifier.utils.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import org.springframework.stereotype.Component;
 
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Slf4j
-public class GetTokenLocationAndSize extends PDFTextStripper {
+@Component
+public class SearchablePdfUtil extends PDFTextStripper {
+
 
     private final List<Token> tokenList;
+    private final MathUtils mathUtils;
 
-    public GetTokenLocationAndSize(List<Token> tokenList) throws IOException {
+    public SearchablePdfUtil(List<Token> tokenList) throws IOException {
         this.tokenList = tokenList;
+        this.mathUtils = new MathUtils();
     }
 
-
+    /**
+     * <a href="https://github.com/mkl-public/testarea-pdfbox2/blob/master/src/test/java/mkl/testarea/pdfbox2/extract/ExtractWordCoordinates.java">...</a>
+     * @param string
+     * @param textPositions
+     */
     @Override
     protected void writeString(String string, List<TextPosition> textPositions){
         String wordSeparator = getWordSeparator();
@@ -44,24 +52,20 @@ public class GetTokenLocationAndSize extends PDFTextStripper {
     }
 
     void getTokenBoundingBox(List<TextPosition> word) {
+
         Rectangle2D boundingBox = null;
         StringBuilder token = new StringBuilder();
         for (TextPosition text : word) {
             Rectangle2D box = new Rectangle2D.Float(text.getXDirAdj(), text.getYDirAdj(), text.getWidthDirAdj(), text.getHeightDir());
-            if (boundingBox == null)
+            if (boundingBox == null) {
                 boundingBox = box;
-            else
+            }else {
                 boundingBox.add(box);
+            }
             token.append(text.getUnicode());
         }
-        log.info("Token [{}]X= {} Y={} width={}", token, round(boundingBox.getX()), round(boundingBox.getY()), round(boundingBox.getWidth()));
-        tokenList.add(new Token(token.toString(), round(boundingBox.getX()), round(boundingBox.getY())));
-    }
-
-    protected double round(double round){
-
-        BigDecimal bd = new BigDecimal(round).setScale(2, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        log.info("Token [{}]X= {} Y={}", token, mathUtils.round(boundingBox.getX()), mathUtils.round(boundingBox.getY()));
+        tokenList.add(new Token(token.toString(), mathUtils.round(boundingBox.getX()), mathUtils.round(boundingBox.getY())));
     }
 }
 

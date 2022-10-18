@@ -1,6 +1,7 @@
-package de.reza.documentclassifier.utils;
+package de.reza.documentclassifier.pdf;
 
 import de.reza.documentclassifier.pojo.Token;
+import de.reza.documentclassifier.utils.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.ITesseract;
@@ -11,22 +12,20 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Service
+@Component
 @Slf4j
-public class OcrProcessor {
+public class PdfProcessor {
 
     @Value("${SCALE_FACTOR_X}")
     private double scaleFactorX;
@@ -37,27 +36,41 @@ public class OcrProcessor {
     @Value("${DPI}")
     private int dpi;
 
-    /**
-     * Checks if the PDF document is searchable. Counts the fonts that appear in the document.
-     * @param doc   Given document
-     * @return      True: No font occurs in the document. False: Font occurs in the document.
-     */
-    public boolean isReadable(PDDocument doc) {
+    private MathUtils mathUtils;
 
-        PDPage page = doc.getPage(0); // 0 based
-        PDResources resources = page.getResources();
-        AtomicInteger number= new AtomicInteger();
-        resources.getFontNames().iterator().forEachRemaining(font -> number.getAndIncrement());
-        return number.get() != 0 ? false : true;
+    public PdfProcessor(MathUtils mathUtils){
+        this.mathUtils = mathUtils;
     }
 
     /**
-     * Performs OCR from the text and tokenizes the text. Coordinates of the tokens are determined.
+     * Generate a list of {@link Token} from a searchable PDF document
+     * @param document      pdf document
+     * @return              list of all {@link Token}
+     * @throws IOException  file is not valid
+     */
+    public List<Token> getTokensFromSearchablePdf(PDDocument document) throws IOException {
+
+        List<Token> tokenSetPdf = new ArrayList<>();
+        try {
+            PDFTextStripper stripper = new SearchablePdfUtil(tokenSetPdf);
+            stripper.setSortByPosition(true);
+            stripper.setStartPage(0);stripper.setEndPage(document.getNumberOfPages());
+            Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
+            stripper.writeText(document, dummy);
+        } catch (IOException e) {
+            return null;
+        }
+        document.close();
+        return tokenSetPdf;
+    }
+
+    /**
+     * Performs OCR and generate a list of {@Token} from a PDF document
      * @param document      Given document
      * @return              List of {@link Token}
      * @throws IOException  OCR processing does not work
      */
-    public List<Token> doOcr(PDDocument document) throws IOException {
+    public List<Token> getTokensFromPdfWithOcr(PDDocument document) throws IOException {
 
         ITesseract instance = new Tesseract();
         File tessDataFolder = LoadLibs.extractTessResources("tessdata");
@@ -75,18 +88,25 @@ public class OcrProcessor {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
                     Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
-                    tokenSet.add(new Token(word.getText(), round(boundingBox.getX()) * scaleFactorX,  round(boundingBox.getY()) * scaleFactorY));
-                    log.info("Token: [" + word.getText() + "] X= " + round(boundingBox.getX()) * scaleFactorX + " Y= " + round(boundingBox.getY()) * scaleFactorY + " Width=" + round(boundingBox.getWidth()) + " Height=" + boundingBox.getHeight());
+                    tokenSet.add(new Token(word.getText(), mathUtils.round(boundingBox.getX()) * scaleFactorX,  mathUtils.round(boundingBox.getY()) * scaleFactorY));
+                    log.info("Token: [" + word.getText() + "] X= " + mathUtils.round(boundingBox.getX()) * scaleFactorX + " Y= " + mathUtils.round(boundingBox.getY()) * scaleFactorY);
                 }
             });
         }
         return tokenSet;
     }
 
-    protected double round(double round){
+    /**
+     * Checks if the provided document is searchable
+     * @param document  PDF document
+     * @return          true: is searchable ; false: is not searchable
+     */
+    public boolean isSearchable(PDDocument document) {
 
-        BigDecimal bd = new BigDecimal(round).setScale(2, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+        PDPage page = document.getPage(0);
+        PDResources resources = page.getResources();
+        AtomicInteger number= new AtomicInteger();
+        resources.getFontNames().iterator().forEachRemaining(font -> number.getAndIncrement());
+        return number.get() == 0;
     }
-
 }

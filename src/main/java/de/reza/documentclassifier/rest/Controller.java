@@ -2,11 +2,10 @@ package de.reza.documentclassifier.rest;
 
 import de.reza.documentclassifier.classification.Classifier;
 import de.reza.documentclassifier.classification.Training;
-import de.reza.documentclassifier.pdfutils.PdfProcessor;
+import de.reza.documentclassifier.pdf.PdfProcessor;
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.DatasetProcessor;
-import de.reza.documentclassifier.utils.OcrProcessor;
 import de.reza.documentclassifier.utils.JsonProcessor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +23,13 @@ public class Controller {
     DatasetProcessor datasetProcessor;
     Classifier classifier;
     Training trainer;
-    OcrProcessor ocrProcessor;
     PdfProcessor pdfProcessor;
     JsonProcessor jsonProcessor;
     
-    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, OcrProcessor ocrProcessor, PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
+    public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
         this.datasetProcessor = datasetProcessor;
         this.classifier = classifier;
         this.trainer = trainer;
-        this.ocrProcessor = ocrProcessor;
         this.pdfProcessor = pdfProcessor;
         this.jsonProcessor = jsonProcessor;
     }
@@ -58,11 +55,11 @@ public class Controller {
             Map<String, List<Token>> allClasses = new HashMap<>();
             files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
             List<Prediction> predictionList = new ArrayList<>();
-            if (!ocrProcessor.isReadable(document)) {
-                List<Token> tokenSetOcr = ocrProcessor.doOcr(document);
+            if (pdfProcessor.isSearchable(document)) {
+                List<Token> tokenSetOcr = pdfProcessor.getTokensFromPdfWithOcr(document);
                 allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false)));
             } else {
-                List<Token> tokenSetPdf = pdfProcessor.getTokensFromPdf(document);
+                List<Token> tokenSetPdf = pdfProcessor.getTokensFromSearchablePdf(document);
                 allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true)));
             }
             document.close();
