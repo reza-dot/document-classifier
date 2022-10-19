@@ -36,7 +36,7 @@ public class PdfProcessor {
     @Value("${DPI}")
     private int dpi;
 
-    private MathUtils mathUtils;
+    private final MathUtils mathUtils;
 
     public PdfProcessor(MathUtils mathUtils){
         this.mathUtils = mathUtils;
@@ -80,7 +80,7 @@ public class PdfProcessor {
         instance.setPageSegMode(ITessAPI.TessOcrEngineMode.OEM_TESSERACT_LSTM_COMBINED);
         instance.setOcrEngineMode(ITessAPI.TessPageSegMode.PSM_AUTO_OSD);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
-        List<Token> tokenSet = new ArrayList<>();
+        List<Token> tokenList = new ArrayList<>();
 
         for (int page = 0; page < document.getNumberOfPages(); page++) {
             BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
@@ -88,12 +88,12 @@ public class PdfProcessor {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
                     Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
-                    tokenSet.add(new Token(word.getText(), mathUtils.round(boundingBox.getX()) * scaleFactorX,  mathUtils.round(boundingBox.getY()) * scaleFactorY));
+                    tokenList.add(new Token(word.getText(), mathUtils.round(boundingBox.getX()) * scaleFactorX,  mathUtils.round(boundingBox.getY()) * scaleFactorY));
                     log.info("Token: [" + word.getText() + "] X= " + mathUtils.round(boundingBox.getX()) * scaleFactorX + " Y= " + mathUtils.round(boundingBox.getY()) * scaleFactorY);
                 }
             });
         }
-        return tokenSet;
+        return tokenList;
     }
 
     /**

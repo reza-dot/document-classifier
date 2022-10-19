@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 public class JsonProcessor {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void createJsonFile(List<Token> tokenSet, String uuid, String filename){
 

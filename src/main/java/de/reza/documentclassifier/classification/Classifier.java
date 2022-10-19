@@ -20,7 +20,7 @@ public class Classifier {
     @Value("${MAX_DISTANCE_OCR}")
     private int maxDistanceOcr;
 
-    private MathUtils mathUtils;
+    private final MathUtils mathUtils;
 
     public Classifier(MathUtils mathUtils){
         this.mathUtils = mathUtils;
@@ -42,7 +42,7 @@ public class Classifier {
 
             HashMap<Token, Double> matches = new HashMap<>();
             tokenListOcr.forEach(tokenPdf -> {
-                if(tokenPdf.getTokeName().equals(tokenClass.getTokeName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
+                if(tokenPdf.getTokenKey().equals(tokenClass.getTokenKey()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
                     matches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
                 }

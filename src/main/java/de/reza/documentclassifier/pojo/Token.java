@@ -10,7 +10,7 @@ import lombok.*;
 @EqualsAndHashCode
 public final class Token {
 
-    private String tokeName;
+    private String tokenKey;
 
     private double xAxis;
 

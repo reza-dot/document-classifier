@@ -17,7 +17,6 @@ import java.util.List;
 @Component
 public class SearchablePdfUtil extends PDFTextStripper {
 
-
     private final List<Token> tokenList;
     private final MathUtils mathUtils;
 
@@ -28,8 +27,6 @@ public class SearchablePdfUtil extends PDFTextStripper {
 
     /**
      * <a href="https://github.com/mkl-public/testarea-pdfbox2/blob/master/src/test/java/mkl/testarea/pdfbox2/extract/ExtractWordCoordinates.java">...</a>
-     * @param string
-     * @param textPositions
      */
     @Override
     protected void writeString(String string, List<TextPosition> textPositions){
@@ -43,7 +40,6 @@ public class SearchablePdfUtil extends PDFTextStripper {
                 getTokenBoundingBox(word);
                 word.clear();
             }
-
         });
         if (!word.isEmpty()) {
             getTokenBoundingBox(word);
@@ -55,8 +51,9 @@ public class SearchablePdfUtil extends PDFTextStripper {
 
         Rectangle2D boundingBox = null;
         StringBuilder token = new StringBuilder();
+
         for (TextPosition text : word) {
-            Rectangle2D box = new Rectangle2D.Float(text.getXDirAdj(), text.getYDirAdj(), text.getWidthDirAdj(), text.getHeightDir());
+            Rectangle2D box = new Rectangle2D.Double(text.getXDirAdj(), text.getYDirAdj(), text.getWidthDirAdj(), text.getHeightDir());
             if (boundingBox == null) {
                 boundingBox = box;
             }else {

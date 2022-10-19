@@ -20,11 +20,11 @@ import java.util.*;
 @Slf4j
 public class Controller {
 
-    DatasetProcessor datasetProcessor;
-    Classifier classifier;
-    Training trainer;
-    PdfProcessor pdfProcessor;
-    JsonProcessor jsonProcessor;
+    private final DatasetProcessor datasetProcessor;
+    private final Classifier classifier;
+    private final Training trainer;
+    private final PdfProcessor pdfProcessor;
+    private final JsonProcessor jsonProcessor;
     
     public Controller(DatasetProcessor datasetProcessor, Classifier classifier, Training trainer, PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
         this.datasetProcessor = datasetProcessor;

@@ -16,9 +16,9 @@ import java.util.*;
 @Slf4j
 public class Training {
 
-    PdfProcessor pdfProcessor;
+    private final PdfProcessor pdfProcessor;
 
-    JsonProcessor jsonProcessor;
+    private final JsonProcessor jsonProcessor;
 
     public Training(PdfProcessor pdfProcessor, JsonProcessor jsonProcessor){
         this.pdfProcessor = pdfProcessor;
