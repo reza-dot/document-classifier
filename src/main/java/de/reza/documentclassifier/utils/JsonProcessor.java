@@ -16,16 +16,27 @@ public class JsonProcessor {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void createJsonFile(List<Token> tokenSet, String uuid, String filename){
+    /**
+     * Maps a {@link List<Token>} to a json file
+     * @param tokenList     provided list of {@link Token}
+     * @param uuid          uuid of the model
+     * @param filename      classname
+     */
+    public void createJsonFile(List<Token> tokenList, String uuid, String filename){
 
         try {
             log.info("JSON file created: {}", filename);
-            objectMapper.writeValue(new File("models/"+ uuid + "/" + filename + ".json"), tokenSet);
+            objectMapper.writeValue(new File("models/"+ uuid + "/" + filename + ".json"), tokenList);
         } catch (IOException e) {
             log.info("JSON file could not be created");
         }
     }
 
+    /**
+     * Maps a json file to a  {@link List<Token>}
+     * @param jsonFile      class
+     * @return              list of {@link Token} from the class
+     */
      public List<Token> readJsonFile(File jsonFile){
          try {
              return objectMapper.readValue(jsonFile, new TypeReference<>(){});

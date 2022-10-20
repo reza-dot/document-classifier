@@ -28,20 +28,20 @@ public class Classifier {
 
     /**
      * Predicting a given token list based on the token list of a class.
-     * @param tokenListOcr      list of recognized tokens by OCR from the given document
+     * @param tokenList      list of recognized tokens by OCR from the given document
      * @param classname         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
      * @return                  Returns {@link Prediction}
      */
-    public Prediction predict(List<Token> tokenListOcr, String classname, List<Token> tokenListClass, boolean isReadable){
+    public Prediction predict(List<Token> tokenList, String classname, List<Token> tokenListClass, boolean isSearchable){
 
-        int distance = getDistanceProfile(isReadable);
+        int distance = getDistanceProfile(isSearchable);
         HashMap<Token, Double> foundTokens = new HashMap<>();
 
         tokenListClass.forEach(tokenClass -> {
 
             HashMap<Token, Double> matches = new HashMap<>();
-            tokenListOcr.forEach(tokenPdf -> {
+            tokenList.forEach(tokenPdf -> {
                 if(tokenPdf.getTokenKey().equals(tokenClass.getTokenKey()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
                     matches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
