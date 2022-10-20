@@ -12,13 +12,18 @@ public class MathUtils {
     /**
      * Calculates the distance between two points
      * @param tokenClass    Token of a class
-     * @param token         Token of given document
+     * @param token         Token of given pdf document
      * @return              distance between two points
      */
     public double euclideanDistance(Token tokenClass, Token token) {
         return Math.sqrt((tokenClass.getYAxis() - token.getYAxis()) * (tokenClass.getYAxis()- token.getYAxis()) + (tokenClass.getXAxis() - token.getXAxis()) * (tokenClass.getXAxis()  - token.getXAxis()));
     }
 
+    /**
+     * Rounded by two decimal places
+     * @param round         value which should be rounded
+     * @return              rounded value
+     */
     public double round(double round){
 
         BigDecimal bd = new BigDecimal(round).setScale(2, RoundingMode.HALF_UP);

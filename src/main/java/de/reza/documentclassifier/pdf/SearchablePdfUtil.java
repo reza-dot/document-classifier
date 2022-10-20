@@ -26,7 +26,12 @@ public class SearchablePdfUtil extends PDFTextStripper {
     }
 
     /**
+     * Overriding writeString in order to get segmented words (tokens) instead of the whole text from pdf
+     * modified code from
      * <a href="https://github.com/mkl-public/testarea-pdfbox2/blob/master/src/test/java/mkl/testarea/pdfbox2/extract/ExtractWordCoordinates.java">...</a>
+     * @author mkl
+     * @param string            Write a Java string to the output stream
+     * @param textPositions     This represents a string and a position on the screen of those characters
      */
     @Override
     protected void writeString(String string, List<TextPosition> textPositions){
@@ -47,6 +52,10 @@ public class SearchablePdfUtil extends PDFTextStripper {
         }
     }
 
+    /**
+     * Creates a bounding box around the segmented word. Creates an {@link Token} with the segmented word, the X-axis and Y-axis. Adds the {@link Token} to the referenced token list.
+     * @param word      This represents a string and a position on the screen of those characters
+     */
     void getTokenBoundingBox(List<TextPosition> word) {
 
         Rectangle2D boundingBox = null;

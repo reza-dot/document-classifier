@@ -34,16 +34,26 @@ public class Controller {
         this.jsonProcessor = jsonProcessor;
     }
 
-
+    /**
+     *  API Endpoint for training a model
+     * @param file  ZIP file, which includes the pdf documents for training
+     * @return      uuid of the trained model
+     */
     @PostMapping("/api/train")
     public String training(@RequestParam("dataset")@NonNull MultipartFile file) {
 
         String uuid = UUID.randomUUID().toString();
         String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
         trainer.startTraining(pathToTrainingfiles, uuid);
-        return "Your trained model " + uuid;
+        return uuid;
     }
 
+    /**
+     * API endpoint for classifying a given document
+     * @param uuid     uuid of a trained model
+     * @param file     PDF document which should be classified
+     * @return         {@link List<Prediction>}
+     */
     @GetMapping("/api/predict/{uuid}")
     public List<Prediction> predict(@PathVariable("uuid") @NonNull String uuid, @RequestParam("document") @NonNull MultipartFile file)  {
 
@@ -56,11 +66,11 @@ public class Controller {
             files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
             List<Prediction> predictionList = new ArrayList<>();
             if (pdfProcessor.isSearchable(document)) {
-                List<Token> tokenSetOcr = pdfProcessor.getTokensFromPdfWithOcr(document);
-                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenSetOcr, classname, tokenSetClass, false)));
+                List<Token> tokenListOcr = pdfProcessor.getTokensFromPdfWithOcr(document);
+                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenListOcr, classname, tokenSetClass, false)));
             } else {
-                List<Token> tokenSetPdf = pdfProcessor.getTokensFromSearchablePdf(document);
-                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenSetPdf, classname, tokenSetClass, true)));
+                List<Token> tokenList = pdfProcessor.getTokensFromSearchablePdf(document);
+                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenList, classname, tokenSetClass, true)));
             }
             document.close();
             log.info("computing time = {} milliseconds", (System.currentTimeMillis() - start));
