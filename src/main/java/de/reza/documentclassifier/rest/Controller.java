@@ -43,9 +43,12 @@ public class Controller {
     public String training(@RequestParam("dataset")@NonNull MultipartFile file) {
 
         String uuid = UUID.randomUUID().toString();
-        String pathToTrainingfiles = datasetProcessor.unzip(file, uuid);
-        trainer.startTraining(pathToTrainingfiles, uuid);
-        return uuid;
+        return Optional.ofNullable(datasetProcessor.unzip(file, uuid)).map(
+                dataset -> {
+                    trainer.startTraining(dataset, uuid);
+                    return uuid;
+                }
+        ).orElse("Please provide a valid dataset");
     }
 
     /**
