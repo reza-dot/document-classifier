@@ -1,12 +1,10 @@
 package de.reza.documentclassifier.pdf;
 
+import de.reza.documentclassifier.config.TesseractConfig;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITessAPI;
-import net.sourceforge.tess4j.ITesseract;
-import net.sourceforge.tess4j.Tesseract;
-import net.sourceforge.tess4j.util.LoadLibs;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDResources;
@@ -36,13 +34,14 @@ public class PdfProcessor {
     @Value("${DPI}")
     private int dpi;
 
-    @Value("${ocr.model}")
-    private String model;
-
     private final MathUtils mathUtils;
 
-    public PdfProcessor(MathUtils mathUtils){
+    private final TesseractConfig tesseractConfig;
+
+    public PdfProcessor(MathUtils mathUtils, TesseractConfig tesseractConfig){
         this.mathUtils = mathUtils;
+        this.tesseractConfig = tesseractConfig;
+
     }
 
     /**
@@ -53,9 +52,9 @@ public class PdfProcessor {
      */
     public List<Token> getTokensFromSearchablePdf(PDDocument document) throws IOException {
 
-        List<Token> tokenSetPdf = new ArrayList<>();
+        List<Token> tokenListPdf = new ArrayList<>();
         try {
-            PDFTextStripper stripper = new SearchablePdfUtil(tokenSetPdf);
+            PDFTextStripper stripper = new SearchablePdfUtil(tokenListPdf);
             stripper.setSortByPosition(true);
             stripper.setStartPage(0);stripper.setEndPage(document.getNumberOfPages());
             Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
@@ -64,7 +63,7 @@ public class PdfProcessor {
             return null;
         }
         document.close();
-        return tokenSetPdf;
+        return tokenListPdf;
     }
 
     /**
@@ -75,19 +74,12 @@ public class PdfProcessor {
      */
     public List<Token> getTokensFromPdfWithOcr(PDDocument document) throws IOException {
 
-        ITesseract instance = new Tesseract();
-        File tessDataFolder = LoadLibs.extractTessResources("tessdata");
-        instance.setDatapath(tessDataFolder.getPath());
-        instance.setLanguage(model);
-        instance.setVariable("user_defined_dpi", String.valueOf(dpi));
-        instance.setOcrEngineMode(ITessAPI.TessOcrEngineMode.OEM_DEFAULT);
-        instance.setPageSegMode(ITessAPI.TessPageSegMode.PSM_AUTO_ONLY);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         List<Token> tokenList = new ArrayList<>();
 
         for (int page = 0; page < document.getNumberOfPages(); page++) {
             BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
-            instance.getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD).forEach(word -> {
+            tesseractConfig.getInstance().getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD).forEach(word -> {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
                     Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());

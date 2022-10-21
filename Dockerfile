@@ -7,6 +7,9 @@ WORKDIR /app
 # As layers are cached and packages updated infrequently this increases build speed.
 COPY .mvn ./.mvn/
 COPY mvnw pom.xml ./
+RUN apt-get update
+RUN apt-get -y install tesseract-ocr
+RUN ldconfig
 RUN ./mvnw dependency:go-offline
 
 # Copy everything else and build
@@ -19,8 +22,6 @@ FROM eclipse-temurin:17-jre
 RUN apt-get update
 RUN apt-get -y install tesseract-ocr
 RUN ldconfig
-RUN tesseract --list-langs
-RUN tesseract -v
 WORKDIR /app
 
 EXPOSE 8080
