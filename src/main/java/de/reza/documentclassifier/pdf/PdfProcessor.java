@@ -107,6 +107,6 @@ public class PdfProcessor {
         PDResources resources = page.getResources();
         AtomicInteger number= new AtomicInteger();
         resources.getFontNames().iterator().forEachRemaining(font -> number.getAndIncrement());
-        return number.get() == 0;
+        return number.get() != 0;
     }
 }
