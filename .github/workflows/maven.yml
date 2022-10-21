@@ -8,10 +8,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  ldconfig:
-    run: apt-get update
   build:
-
     runs-on: ubuntu-latest
 
     steps:
