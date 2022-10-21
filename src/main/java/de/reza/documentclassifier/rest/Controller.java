@@ -69,18 +69,17 @@ public class Controller {
             files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
             List<Prediction> predictionList = new ArrayList<>();
             if (pdfProcessor.isSearchable(document)) {
-                List<Token> tokenListOcr = pdfProcessor.getTokensFromPdfWithOcr(document);
-                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenListOcr, classname, tokenSetClass, false)));
-            } else {
                 List<Token> tokenList = pdfProcessor.getTokensFromSearchablePdf(document);
                 allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenList, classname, tokenSetClass, true)));
+            } else {
+                List<Token> tokenListOcr = pdfProcessor.getTokensFromPdfWithOcr(document);
+                allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenListOcr, classname, tokenSetClass, false)));
             }
             document.close();
             log.info("computing time = {} milliseconds", (System.currentTimeMillis() - start));
             return predictionList;
         } catch (IOException e) {
-            log.error("Not supported filetype or no file provided");
-            return null;
+            throw new RuntimeException("Not supported filetype or no file provided");
         }
     }
 }
