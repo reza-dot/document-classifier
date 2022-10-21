@@ -19,8 +19,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: update
-      run: apt-get update
     - name: tesseract
       run: apt-get -y install tesseract-ocr
     - name: config
