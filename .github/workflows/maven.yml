@@ -8,6 +8,13 @@ on:
     branches: [ "master" ]
 
 jobs:
+
+  update:
+    run: apt-get update
+  ocr:
+    run: apt-get -y install tesseract-ocr
+  ldconfig:
+    run: apt-get update
   build:
 
     runs-on: ubuntu-latest
