@@ -36,6 +36,9 @@ public class PdfProcessor {
     @Value("${DPI}")
     private int dpi;
 
+    @Value("${ocr.model}")
+    private String model;
+
     private final MathUtils mathUtils;
 
     public PdfProcessor(MathUtils mathUtils){
@@ -75,10 +78,10 @@ public class PdfProcessor {
         ITesseract instance = new Tesseract();
         File tessDataFolder = LoadLibs.extractTessResources("tessdata");
         instance.setDatapath(tessDataFolder.getPath());
-        instance.setLanguage("deu");
+        instance.setLanguage(model);
         instance.setVariable("user_defined_dpi", String.valueOf(dpi));
-        instance.setPageSegMode(ITessAPI.TessOcrEngineMode.OEM_TESSERACT_LSTM_COMBINED);
-        instance.setOcrEngineMode(ITessAPI.TessPageSegMode.PSM_AUTO_OSD);
+        instance.setOcrEngineMode(ITessAPI.TessOcrEngineMode.OEM_DEFAULT);
+        instance.setPageSegMode(ITessAPI.TessPageSegMode.PSM_AUTO_ONLY);
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         List<Token> tokenList = new ArrayList<>();
 
