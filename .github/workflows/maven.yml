@@ -8,11 +8,6 @@ on:
     branches: [ "master" ]
 
 jobs:
-
-  update:
-    run: apt-get update
-  ocr:
-    run: apt-get -y install tesseract-ocr
   ldconfig:
     run: apt-get update
   build:
@@ -27,5 +22,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    - name: update
+      run: apt-get update
+    - name: tesseract
+      run: apt-get -y install tesseract-ocr
+    - name: config
+      run: ldconfig
     - name: Build with Maven
       run: mvn -B package --file pom.xml
