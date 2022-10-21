@@ -31,12 +31,12 @@ public class OcrIntegrationTest {
     /**
      * Checks if PDF document is searchable, in order to extract and tokenize the texts from the image document in the next step.
      */
-    //@Test
+    @Test
     public void readTextFromImage() throws IOException {
         ClassPathResource classPathResource = new ClassPathResource("test/Image_document_300_dpi.pdf");
         assertTrue(classPathResource.getFile().exists());
         PDDocument document = PDDocument.load(classPathResource.getInputStream());
-        assertFalse(!pdfProcessor.isSearchable(document));
+        assertFalse(pdfProcessor.isSearchable(document));
         List<Token> tokenList = pdfProcessor.getTokensFromPdfWithOcr(document);
         List<Token> tokenListClass = new ArrayList<>();
         tokenListClass.add(new Token("Das", 71, 74));

@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -20,5 +19,11 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    - name: update
+      run: sudo apt-get update
+    - name: tesseract
+      run: sudo apt-get -y install tesseract-ocr
+    - name: config
+      run: sudo ldconfig
     - name: Build with Maven
       run: mvn -B package --file pom.xml
