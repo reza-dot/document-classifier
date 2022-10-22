@@ -13,8 +13,6 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
@@ -82,9 +80,8 @@ public class PdfProcessor {
             tesseractConfig.getInstance().getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD).forEach(word -> {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
-                    Rectangle2D boundingBox = new Rectangle2D.Double(word.getBoundingBox().getX(), word.getBoundingBox().getY(), word.getBoundingBox().getWidth(), word.getBoundingBox().getHeight());
-                    tokenList.add(new Token(word.getText(), mathUtils.round(boundingBox.getX()) * scaleFactorX,  mathUtils.round(boundingBox.getY()) * scaleFactorY));
-                    log.info("Token: [" + word.getText() + "] X= " + mathUtils.round(boundingBox.getX()) * scaleFactorX + " Y= " + mathUtils.round(boundingBox.getY()) * scaleFactorY);
+                    tokenList.add(new Token(word.getText(), mathUtils.round(word.getBoundingBox().getX()) * scaleFactorX,  mathUtils.round(word.getBoundingBox().getY()) * scaleFactorY));
+                    log.info("Token: [" + word.getText() + "] X= " + word.getBoundingBox().getX() * scaleFactorX + " Y= " + mathUtils.round(word.getBoundingBox().getY()) * scaleFactorY);
                 }
             });
         }
