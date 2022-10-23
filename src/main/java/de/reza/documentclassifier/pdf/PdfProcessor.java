@@ -54,7 +54,8 @@ public class PdfProcessor {
         try {
             PDFTextStripper stripper = new SearchablePdfUtil(tokenListPdf);
             stripper.setSortByPosition(true);
-            stripper.setStartPage(0);stripper.setEndPage(document.getNumberOfPages());
+            stripper.setStartPage(0);
+            stripper.setEndPage(document.getNumberOfPages());
             Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
             stripper.writeText(document, dummy);
         } catch (IOException e) {
