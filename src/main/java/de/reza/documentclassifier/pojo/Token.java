@@ -5,15 +5,13 @@ import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode
+@Data
 public final class Token {
 
     /**
      * A tokenized word from a PDF document
      */
-    private String tokenKey;
+    private String tokenName;
 
     /**
      * X-axis of the Bounding Box

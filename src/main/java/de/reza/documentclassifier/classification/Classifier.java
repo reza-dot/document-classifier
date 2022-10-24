@@ -37,12 +37,12 @@ public class Classifier {
 
         int distance = getDistanceProfile(isSearchable);
         HashMap<Token, Double> foundTokens = new HashMap<>();
-
+        log.info("Start predicting for {}", classname);
         tokenListClass.forEach(tokenClass -> {
 
             HashMap<Token, Double> matches = new HashMap<>();
             tokenList.forEach(tokenPdf -> {
-                if(tokenPdf.getTokenKey().equals(tokenClass.getTokenKey()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
+                if(tokenPdf.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
                     matches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
                 }
@@ -62,7 +62,7 @@ public class Classifier {
                 }
             }
         });
-        return new Prediction(classname, foundTokens.size(), tokenListClass.size());
+        return new Prediction(classname, foundTokens.size(), tokenListClass.size(), foundTokens);
     }
 
     /**

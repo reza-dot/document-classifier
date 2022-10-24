@@ -15,7 +15,7 @@ import java.util.Map;
 import static java.util.Comparator.comparingDouble;
 
 @SpringBootTest
-public class kNearestNeighborTest {
+public class GetNearestToken {
 
     @Autowired
     Classifier classifier;
@@ -37,7 +37,5 @@ public class kNearestNeighborTest {
                 mathUtils.euclideanDistance(token, firstCandidate),
                 mathUtils.euclideanDistance(token, tokenWithLowestDistance)
                 );
-
-
     }
 }
