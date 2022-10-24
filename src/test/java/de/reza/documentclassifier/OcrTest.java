@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Slf4j
-public class OcrIntegrationTest {
+public class OcrTest {
 
     @Autowired
     PdfProcessor pdfProcessor;
@@ -33,7 +33,7 @@ public class OcrIntegrationTest {
      */
     @Test
     public void readTextFromImage() throws IOException {
-        ClassPathResource classPathResource = new ClassPathResource("test/Image_document_300_dpi.pdf");
+        ClassPathResource classPathResource = new ClassPathResource("test/OcrTest_Image_document_300_dpi.pdf");
         assertTrue(classPathResource.getFile().exists());
         PDDocument document = PDDocument.load(classPathResource.getInputStream());
         assertFalse(pdfProcessor.isSearchable(document));

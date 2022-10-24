@@ -1,10 +1,15 @@
 package de.reza.documentclassifier.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.ToString;
+
+import java.util.HashMap;
 
 @AllArgsConstructor
 @Getter
+@ToString
 public final class Prediction {
 
     /**
@@ -27,10 +32,17 @@ public final class Prediction {
      */
     private double probability;
 
-    public Prediction(String classname, int numberOfFoundTokens, int numberOfTokensInClass){
+    /**
+     * All found tokens from the document, which match the tokens from the class.
+     */
+    @JsonIgnore
+    private HashMap<Token, Double> foundTokens;
+
+    public Prediction(String classname, int numberOfFoundTokens, int numberOfTokensInClass, HashMap<Token, Double>  foundTokens){
         this.classname = classname.split("\\.")[0];
         this.numberOfFoundTokens = numberOfFoundTokens;
         this.numberOfTokensInClass = numberOfTokensInClass;
         this.probability = (double) numberOfFoundTokens /(double) numberOfTokensInClass;
+        this.foundTokens = foundTokens;
     }
 }
