@@ -50,15 +50,15 @@ public class Classifier {
 
             if(matches.size()!=0) {
 
-                Token tokenWithLowestDistance= Collections.min(matches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
-                double euclideanDistance = mathUtils.euclideanDistance(tokenWithLowestDistance, tokenClass);
-                if(foundTokens.containsKey(tokenWithLowestDistance)){
-                    double distanceToken = foundTokens.get(tokenWithLowestDistance);
-                    if(distanceToken > euclideanDistance){
-                        foundTokens.put(tokenWithLowestDistance, euclideanDistance);
+                Token nnToken= Collections.min(matches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
+                double newEuclideanDistance = mathUtils.euclideanDistance(nnToken, tokenClass);
+                if(foundTokens.containsKey(nnToken)){
+                    double distanceFromPreviousNnToken = foundTokens.get(nnToken);
+                    if(distanceFromPreviousNnToken > newEuclideanDistance){
+                        foundTokens.put(nnToken, newEuclideanDistance);
                     }
                 }else {
-                    foundTokens.put(tokenWithLowestDistance, euclideanDistance);
+                    foundTokens.put(nnToken, newEuclideanDistance);
                 }
             }
         });
