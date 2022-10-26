@@ -28,20 +28,21 @@ public class Classifier {
 
     /**
      * Predicting a given token list based on the token list of a class.
-     * @param tokenList      list of recognized tokens by OCR from the given document
+     * @param tokenListPdf      list of recognized tokens by OCR from the given document
      * @param classname         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
      * @return                  Returns {@link Prediction}
      */
-    public Prediction predict(List<Token> tokenList, String classname, List<Token> tokenListClass, boolean isSearchable){
+    public Prediction predict(List<Token> tokenListPdf, String classname, List<Token> tokenListClass, boolean isSearchable){
 
         int distance = getDistanceProfile(isSearchable);
-        HashMap<Token, Double> foundTokens = new HashMap<>();
+        Map<Token, Double> foundTokens = new HashMap<>();
         log.info("Start predicting for {}", classname);
+        
         tokenListClass.forEach(tokenClass -> {
 
-            HashMap<Token, Double> matches = new HashMap<>();
-            tokenList.forEach(tokenPdf -> {
+            Map<Token, Double> matches = new HashMap<>();
+            tokenListPdf.forEach(tokenPdf -> {
                 if(tokenPdf.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
                     matches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
@@ -50,15 +51,15 @@ public class Classifier {
 
             if(matches.size()!=0) {
 
-                Token nnToken= Collections.min(matches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
-                double newEuclideanDistance = mathUtils.euclideanDistance(nnToken, tokenClass);
-                if(foundTokens.containsKey(nnToken)){
-                    double distanceFromPreviousNnToken = foundTokens.get(nnToken);
-                    if(distanceFromPreviousNnToken > newEuclideanDistance){
-                        foundTokens.put(nnToken, newEuclideanDistance);
+                Token nnTokenPdf= Collections.min(matches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
+                double newEuclideanDistance = mathUtils.euclideanDistance(nnTokenPdf, tokenClass);
+                if(foundTokens.containsKey(nnTokenPdf)){
+                    double distanceFromPreviousNnTokenPdf = foundTokens.get(nnTokenPdf);
+                    if(distanceFromPreviousNnTokenPdf > newEuclideanDistance){
+                        foundTokens.put(nnTokenPdf, newEuclideanDistance);
                     }
                 }else {
-                    foundTokens.put(nnToken, newEuclideanDistance);
+                    foundTokens.put(nnTokenPdf, newEuclideanDistance);
                 }
             }
         });
