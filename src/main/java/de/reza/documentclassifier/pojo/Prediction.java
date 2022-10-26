@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
-
-import java.util.HashMap;
+import java.util.Map;
 
 @AllArgsConstructor
 @Getter
@@ -36,9 +35,9 @@ public final class Prediction {
      * All found tokens from the document, which match the tokens from the class.
      */
     @JsonIgnore
-    private HashMap<Token, Double> foundTokens;
+    private Map<Token, Double> foundTokens;
 
-    public Prediction(String classname, int numberOfFoundTokens, int numberOfTokensInClass, HashMap<Token, Double>  foundTokens){
+    public Prediction(String classname, int numberOfFoundTokens, int numberOfTokensInClass, Map<Token, Double>  foundTokens){
         this.classname = classname.split("\\.")[0];
         this.numberOfFoundTokens = numberOfFoundTokens;
         this.numberOfTokensInClass = numberOfTokensInClass;

@@ -45,7 +45,7 @@ public class ClassificationTest {
         List<Token> tokenListClass = List.of(
                 new Token("Artikel-Nr.:", 200.0, 943.4),
                 new Token("Artikel-Nr.:", 324.0, 11.4),
-                new Token("Artikel-Nr.:", 355.0, 386.4), // correct Token, because of shortest euclidean distance
+                new Token("Artikel-Nr.:", 355.0, 386.4), // correct Token, because nearest neighbor to class token
                 new Token("Artikel-Nr.:", 124.0, 0.4),
                 new Token("Artikel-Nr.:", 431, 99.2)
         );
