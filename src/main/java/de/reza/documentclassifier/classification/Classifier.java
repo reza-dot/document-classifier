@@ -41,26 +41,16 @@ public class Classifier {
         
         tokenListClass.forEach(tokenClass -> {
 
-            Map<Token, Double> matches = new HashMap<>();
+            Map<Token, Double> candidateMatches = new HashMap<>();
             tokenListPdf.forEach(tokenPdf -> {
                 if(tokenPdf.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
-                    matches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
+                    candidateMatches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
                 }
             } );
 
-            if(matches.size()!=0) {
-
-                Token nnTokenPdf= Collections.min(matches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
-                double newEuclideanDistance = mathUtils.euclideanDistance(nnTokenPdf, tokenClass);
-                if(foundTokens.containsKey(nnTokenPdf)){
-                    double distanceFromPreviousNnTokenPdf = foundTokens.get(nnTokenPdf);
-                    if(distanceFromPreviousNnTokenPdf > newEuclideanDistance){
-                        foundTokens.put(nnTokenPdf, newEuclideanDistance);
-                    }
-                }else {
-                    foundTokens.put(nnTokenPdf, newEuclideanDistance);
-                }
+            if(candidateMatches.size()!=0) {
+                modifiedNearestNeighborSearch(candidateMatches, tokenClass, foundTokens);
             }
         });
         return new Prediction(classname, foundTokens.size(), tokenListClass.size(), foundTokens);
@@ -71,12 +61,33 @@ public class Classifier {
      * @param isSearchable      searchability of the document
      * @return                  distance profile
      */
-    protected int getDistanceProfile(boolean isSearchable){
+    private int getDistanceProfile(boolean isSearchable){
         if(isSearchable){
             return maxDistance;
         }
         else {
             return maxDistanceOcr;
+        }
+    }
+
+    /**
+     * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
+     * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
+     * @param tokenClass        A {@link Token} of a class
+     * @param foundTokens       Already found {@link Token} with their distance to a class {@link Token}
+     */
+    private void modifiedNearestNeighborSearch(Map<Token, Double> candidateMatches, Token tokenClass, Map<Token, Double> foundTokens){
+
+        Token nnTokenPdf= Collections.min(candidateMatches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
+        double newEuclideanDistance = mathUtils.euclideanDistance(nnTokenPdf, tokenClass);
+
+        if(foundTokens.containsKey(nnTokenPdf)){
+            double distanceFromPreviousNnTokenPdf = foundTokens.get(nnTokenPdf);
+            if(distanceFromPreviousNnTokenPdf > newEuclideanDistance){
+                foundTokens.put(nnTokenPdf, newEuclideanDistance);
+            }
+        }else {
+            foundTokens.put(nnTokenPdf, newEuclideanDistance);
         }
     }
 }
