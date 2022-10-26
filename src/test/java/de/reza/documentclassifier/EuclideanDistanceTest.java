@@ -19,8 +19,8 @@ public class EuclideanDistanceTest {
     @Test
     public void calculateDistanceBetweenTwoPoints(){
 
-        Token token1 = new Token("Apfelkuchen", 40.2f, 10.7f);
-        Token token2 = new Token("Butterkuchen", 70.9f, 1.7f);
+        Token token1 = new Token("Apfelkuchen", 40.2, 10.7);
+        Token token2 = new Token("Butterkuchen", 70.9, 1.7);
 
         double distance = mathUtils.euclideanDistance(token1, token2);
         // rounded up to 2 decimal places
