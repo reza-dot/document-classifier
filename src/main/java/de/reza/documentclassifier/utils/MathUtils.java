@@ -26,7 +26,8 @@ public class MathUtils {
      */
     public double round(double round){
 
-        BigDecimal bd = new BigDecimal(round).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal bd = BigDecimal.valueOf(round);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
 }
