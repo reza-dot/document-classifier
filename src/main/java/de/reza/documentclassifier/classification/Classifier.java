@@ -1,15 +1,13 @@
 package de.reza.documentclassifier.classification;
 
+import de.reza.documentclassifier.pojo.Match;
 import de.reza.documentclassifier.pojo.Prediction;
 import de.reza.documentclassifier.pojo.Token;
 import de.reza.documentclassifier.utils.MathUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import java.util.*;
-
-import static java.util.Comparator.comparingDouble;
 
 @Component
 @Slf4j
@@ -36,24 +34,50 @@ public class Classifier {
     public Prediction predict(List<Token> tokenListPdf, String classname, List<Token> tokenListClass, boolean isSearchable){
 
         int distance = getDistanceProfile(isSearchable);
-        Map<Token, Double> foundTokens = new HashMap<>();
+        Map<Token, Match> foundTokens = new HashMap<>();
         log.info("Start predicting for {}", classname);
         
         tokenListClass.forEach(tokenClass -> {
 
-            Map<Token, Double> candidateMatches = new HashMap<>();
+            Map<Token, Match> candidateMatches = new HashMap<>();
             tokenListPdf.forEach(tokenPdf -> {
                 if(tokenPdf.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
 
-                    candidateMatches.put(tokenPdf, mathUtils.euclideanDistance(tokenPdf, tokenClass));
+                    candidateMatches.put(tokenPdf, new Match(tokenPdf, tokenClass, mathUtils.euclideanDistance(tokenPdf, tokenClass)));
                 }
             } );
-
             if(candidateMatches.size()!=0) {
+
                 modifiedNearestNeighborSearch(candidateMatches, tokenClass, foundTokens);
             }
         });
         return new Prediction(classname, foundTokens.size(), tokenListClass.size(), foundTokens);
+    }
+
+    /**
+     * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
+     * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
+     * @param tokenClass        A {@link Token} of a class
+     * @param foundTokens       Already found {@link Token} with their distance to a class {@link Token}
+     */
+    private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Token tokenClass, Map<Token, Match> foundTokens){
+
+        Match nnMatch= candidateMatches.values().stream().min(Comparator.comparing(Match::getDistance)).orElse(null);
+
+        if(foundTokens.containsKey(Objects.requireNonNull(nnMatch).getTokenPdf())){
+
+            double newEuclideanDistance = mathUtils.euclideanDistance(nnMatch.getTokenPdf(), tokenClass);
+            double previousEuclideanDistance = foundTokens.get(nnMatch.getTokenPdf()).getDistance();
+
+            if(previousEuclideanDistance > newEuclideanDistance){
+
+                foundTokens.put(nnMatch.getTokenPdf(), new Match(nnMatch.getTokenPdf(), tokenClass, newEuclideanDistance));
+            }
+        }else {
+
+            double euclideanDistance = mathUtils.euclideanDistance(nnMatch.getTokenPdf(), tokenClass);
+            foundTokens.put(nnMatch.getTokenPdf(), new Match(nnMatch.getTokenPdf(), tokenClass, euclideanDistance));
+        }
     }
 
     /**
@@ -67,27 +91,6 @@ public class Classifier {
         }
         else {
             return maxDistanceOcr;
-        }
-    }
-
-    /**
-     * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
-     * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
-     * @param tokenClass        A {@link Token} of a class
-     * @param foundTokens       Already found {@link Token} with their distance to a class {@link Token}
-     */
-    private void modifiedNearestNeighborSearch(Map<Token, Double> candidateMatches, Token tokenClass, Map<Token, Double> foundTokens){
-
-        Token nnTokenPdf= Collections.min(candidateMatches.entrySet(), comparingDouble(Map.Entry::getValue)).getKey();
-        double newEuclideanDistance = mathUtils.euclideanDistance(nnTokenPdf, tokenClass);
-
-        if(foundTokens.containsKey(nnTokenPdf)){
-            double distanceFromPreviousNnTokenPdf = foundTokens.get(nnTokenPdf);
-            if(distanceFromPreviousNnTokenPdf > newEuclideanDistance){
-                foundTokens.put(nnTokenPdf, newEuclideanDistance);
-            }
-        }else {
-            foundTokens.put(nnTokenPdf, newEuclideanDistance);
         }
     }
 }

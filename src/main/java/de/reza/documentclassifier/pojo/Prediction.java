@@ -34,10 +34,10 @@ public final class Prediction {
     /**
      * All found tokens from the document, which match the tokens from the class.
      */
-    @JsonIgnore
-    private Map<Token, Double> foundTokens;
+    //@JsonIgnore
+    private Map<Token, Match> foundTokens;
 
-    public Prediction(String classname, int numberOfFoundTokens, int numberOfTokensInClass, Map<Token, Double>  foundTokens){
+    public Prediction(String classname, int numberOfFoundTokens, int numberOfTokensInClass, Map<Token, Match>  foundTokens){
         this.classname = classname.split("\\.")[0];
         this.numberOfFoundTokens = numberOfFoundTokens;
         this.numberOfTokensInClass = numberOfTokensInClass;
