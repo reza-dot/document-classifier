@@ -35,6 +35,7 @@ public class Classifier {
 
         int distance = getDistanceProfile(isSearchable);
         Map<Token, Match> foundTokens = new HashMap<>();
+        Set<Token> notFoundTokens = new HashSet<>();
         log.info("Start predicting for {}", classname);
         
         tokenListClass.forEach(tokenClass -> {
@@ -42,41 +43,42 @@ public class Classifier {
             Map<Token, Match> candidateMatches = new HashMap<>();
             tokenListPdf.forEach(tokenPdf -> {
                 if(tokenPdf.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
-
                     candidateMatches.put(tokenPdf, new Match(tokenPdf, tokenClass, mathUtils.euclideanDistance(tokenPdf, tokenClass)));
                 }
             } );
-            if(candidateMatches.size()!=0) {
 
-                modifiedNearestNeighborSearch(candidateMatches, tokenClass, foundTokens);
+            if(candidateMatches.size()!=0) {
+                modifiedNearestNeighborSearch(candidateMatches, foundTokens, notFoundTokens);
+            }
+            else {
+                notFoundTokens.add(tokenClass);
             }
         });
-        return new Prediction(classname, foundTokens.size(), tokenListClass.size(), foundTokens);
+        return new Prediction(classname, foundTokens.size(), tokenListClass.size(), foundTokens, notFoundTokens);
     }
 
     /**
      * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
      * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
-     * @param tokenClass        A {@link Token} of a class
      * @param foundTokens       Already found {@link Token} with their distance to a class {@link Token}
      */
-    private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Token tokenClass, Map<Token, Match> foundTokens){
+    private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Map<Token, Match> foundTokens, Set<Token> notFoundToken){
 
         Match nnMatch= candidateMatches.values().stream().min(Comparator.comparing(Match::getDistance)).orElse(null);
 
         if(foundTokens.containsKey(Objects.requireNonNull(nnMatch).getTokenPdf())){
 
-            double newEuclideanDistance = mathUtils.euclideanDistance(nnMatch.getTokenPdf(), tokenClass);
             double previousEuclideanDistance = foundTokens.get(nnMatch.getTokenPdf()).getDistance();
+            if(previousEuclideanDistance > nnMatch.getDistance()){
 
-            if(previousEuclideanDistance > newEuclideanDistance){
-
-                foundTokens.put(nnMatch.getTokenPdf(), new Match(nnMatch.getTokenPdf(), tokenClass, newEuclideanDistance));
+                notFoundToken.add(foundTokens.get(nnMatch.getTokenPdf()).getTokenClass());
+                foundTokens.put(nnMatch.getTokenPdf(), nnMatch);
+            }else{
+                notFoundToken.add(nnMatch.getTokenClass());
             }
-        }else {
+        }else{
 
-            double euclideanDistance = mathUtils.euclideanDistance(nnMatch.getTokenPdf(), tokenClass);
-            foundTokens.put(nnMatch.getTokenPdf(), new Match(nnMatch.getTokenPdf(), tokenClass, euclideanDistance));
+            foundTokens.put(nnMatch.getTokenPdf(), nnMatch);
         }
     }
 
