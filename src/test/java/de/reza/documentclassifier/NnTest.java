@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 // Providing high distance in order to get all Tokens from the class.
 @SpringBootTest(properties = { "MAX_DISTANCE=99999999" })
 @Slf4j
-public class ClassificationTest {
+public class NnTest {
 
     @Autowired
     PdfProcessor pdfProcessor;
