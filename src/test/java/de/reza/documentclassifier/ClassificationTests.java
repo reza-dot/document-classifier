@@ -47,7 +47,7 @@ public class ClassificationTests {
 
     }
 
-    @Test
+    //@Test
     public void classifyTest() throws IOException {
 
         long start = System.currentTimeMillis();
