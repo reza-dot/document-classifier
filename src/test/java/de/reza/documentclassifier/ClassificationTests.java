@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.jupiter.api.BeforeAll;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -41,7 +42,7 @@ public class ClassificationTests {
     @BeforeAll
     public static void getClasses()  {
 
-        Optional<File[]> files = Optional.ofNullable(new File("models/" + "a1cc51ce-254f-4722-9ff6-9f78b3bcad10").listFiles());
+        Optional<File[]> files = Optional.ofNullable(new File("models/" + "25ee3712-73d6-4080-a166-ef94ad550ea3").listFiles());
         files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
 
     }

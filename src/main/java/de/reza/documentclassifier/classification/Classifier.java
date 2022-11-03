@@ -88,11 +88,7 @@ public class Classifier {
      * @return                  distance profile
      */
     private int getDistanceProfile(boolean isSearchable){
-        if(isSearchable){
-            return maxDistance;
-        }
-        else {
-            return maxDistanceOcr;
-        }
+
+        return isSearchable ? maxDistance : maxDistanceOcr;
     }
 }
