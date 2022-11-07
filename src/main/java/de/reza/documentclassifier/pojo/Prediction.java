@@ -34,7 +34,7 @@ public final class Prediction {
     private double probability;
 
     /**
-     * All found tokens within the PDF-document, which match the tokens from the class.
+     * All found tokens within the document, which match the tokens from the class.
      */
     @JsonIgnore
     private Map<Token, Match> foundPdfTokens;
