@@ -25,7 +25,7 @@ public class Classifier {
     }
 
     /**
-     * Predicting a given token list based on the token list of a class.
+     * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
      * @param tokenListPdf      list of recognized tokens by OCR from the given document
      * @param classname         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
@@ -41,11 +41,11 @@ public class Classifier {
         tokenListClass.forEach(tokenClass -> {
 
             Map<Token, Match> candidateMatches = new HashMap<>();
-            tokenListPdf.forEach(tokenPdf -> {
-                if(tokenPdf.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenPdf, tokenClass) <= distance){
-                    candidateMatches.put(tokenPdf, new Match(tokenPdf, tokenClass, mathUtils.euclideanDistance(tokenPdf, tokenClass)));
+            tokenListPdf.forEach(tokenDocument -> {
+                if(tokenDocument.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenDocument, tokenClass) <= distance){
+                    candidateMatches.put(tokenDocument, new Match(tokenDocument, tokenClass, mathUtils.euclideanDistance(tokenDocument, tokenClass)));
                 }
-            } );
+            });
 
             if(candidateMatches.size()!=0) {
                 modifiedNearestNeighborSearch(candidateMatches, foundTokens, notFoundTokens);
@@ -66,19 +66,19 @@ public class Classifier {
 
         Match nnMatch= candidateMatches.values().stream().min(Comparator.comparing(Match::getDistance)).orElse(null);
 
-        if(foundTokens.containsKey(Objects.requireNonNull(nnMatch).getTokenPdf())){
+        if(foundTokens.containsKey(Objects.requireNonNull(nnMatch).getTokenDocument())){
 
-            double previousEuclideanDistance = foundTokens.get(nnMatch.getTokenPdf()).getDistance();
+            double previousEuclideanDistance = foundTokens.get(nnMatch.getTokenDocument()).getDistance();
             if(previousEuclideanDistance > nnMatch.getDistance()){
 
-                notFoundToken.add(foundTokens.get(nnMatch.getTokenPdf()).getTokenClass());
-                foundTokens.put(nnMatch.getTokenPdf(), nnMatch);
+                notFoundToken.add(foundTokens.get(nnMatch.getTokenDocument()).getTokenClass());
+                foundTokens.put(nnMatch.getTokenDocument(), nnMatch);
             }else{
                 notFoundToken.add(nnMatch.getTokenClass());
             }
         }else{
 
-            foundTokens.put(nnMatch.getTokenPdf(), nnMatch);
+            foundTokens.put(nnMatch.getTokenDocument(), nnMatch);
         }
     }
 

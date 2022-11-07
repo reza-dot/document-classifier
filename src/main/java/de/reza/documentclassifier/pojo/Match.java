@@ -10,9 +10,9 @@ import lombok.ToString;
 public final class Match {
 
     /**
-     * A {@link Token} within a pdf document
+     * A {@link Token} within a document
      */
-    private Token tokenPdf;
+    private Token tokenDocument;
 
     /**
      * A {@link Token} of a token class

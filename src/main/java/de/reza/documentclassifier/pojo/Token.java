@@ -9,7 +9,7 @@ import lombok.*;
 public final class Token {
 
     /**
-     * A tokenized word from a PDF document
+     * A tokenized word from a document
      */
     private String tokenName;
 

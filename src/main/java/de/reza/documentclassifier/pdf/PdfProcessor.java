@@ -58,11 +58,11 @@ public class PdfProcessor {
             stripper.setEndPage(document.getNumberOfPages());
             Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
             stripper.writeText(document, dummy);
+            document.close();
+            return tokenListPdf;
         } catch (IOException e) {
             return null;
         }
-        document.close();
-        return tokenListPdf;
     }
 
     /**
