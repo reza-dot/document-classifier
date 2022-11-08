@@ -52,8 +52,8 @@ public class NnTest {
         );
         Prediction prediction = classifier.predict(tokenList, "test", tokenListClass, true);
         // Assert that only one token is found.
-        assertEquals(1, prediction.getFoundPdfTokens().size());
-        log.info("Found tokens {}", prediction.getFoundPdfTokens());
+        assertEquals(1, prediction.getFoundDocumentTokens().size());
+        log.info("Found tokens {}", prediction.getFoundDocumentTokens());
 
         // Assert that 4 tokens are not found
         assertEquals(6, prediction.getNotFoundClassTokens().size());
@@ -71,7 +71,7 @@ public class NnTest {
         assertTrue(prediction.getNotFoundClassTokens().contains(new Token("Bestellnummer:", 11, 43.9)));
 
         // Get the only Token
-        Token tokenFromPrediction = prediction.getFoundPdfTokens().entrySet().iterator().next().getKey();
+        Token tokenFromPrediction = prediction.getFoundDocumentTokens().entrySet().iterator().next().getKey();
 
         // Euclidean distance between the correct token from the list and the token from the pdf is about 1.67
         double distance = mathUtils.round(mathUtils.euclideanDistance(tokenFromPrediction, new Token("Artikel-Nr.:", 355.0, 386.4)));
