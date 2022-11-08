@@ -26,12 +26,12 @@ public class Classifier {
 
     /**
      * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
-     * @param tokenListPdf      list of recognized tokens by OCR from the given document
+     * @param tokenListDocument      list of recognized tokens by OCR from the given document
      * @param classname         The classname of {@tokenListClass}
      * @param tokenListClass    Included tokens in the class
      * @return                  Returns {@link Prediction}
      */
-    public Prediction predict(List<Token> tokenListPdf, String classname, List<Token> tokenListClass, boolean isSearchable){
+    public Prediction predict(List<Token> tokenListDocument, String classname, List<Token> tokenListClass, boolean isSearchable){
 
         int distance = getDistanceProfile(isSearchable);
         Map<Token, Match> foundTokens = new HashMap<>();
@@ -41,9 +41,10 @@ public class Classifier {
         tokenListClass.forEach(tokenClass -> {
 
             Map<Token, Match> candidateMatches = new HashMap<>();
-            tokenListPdf.forEach(tokenDocument -> {
-                if(tokenDocument.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.euclideanDistance(tokenDocument, tokenClass) <= distance){
-                    candidateMatches.put(tokenDocument, new Match(tokenDocument, tokenClass, mathUtils.euclideanDistance(tokenDocument, tokenClass)));
+            tokenListDocument.forEach(tokenDocument -> {
+                if(tokenDocument.getTokenName().equals(tokenClass.getTokenName()) && mathUtils.round(mathUtils.euclideanDistance(tokenDocument, tokenClass)) <= distance){
+                    
+                    candidateMatches.put(tokenDocument, new Match(tokenDocument, tokenClass, mathUtils.round(mathUtils.euclideanDistance(tokenDocument, tokenClass))));
                 }
             });
 

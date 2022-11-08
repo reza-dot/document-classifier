@@ -81,8 +81,8 @@ public class PdfProcessor {
             tesseractConfig.getInstance().getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD).forEach(word -> {
                 // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
                 if(!word.getText().equals(" ")) {
-                    tokenList.add(new Token(word.getText(), mathUtils.round(word.getBoundingBox().getX()) * scaleFactorX,  mathUtils.round(word.getBoundingBox().getY()) * scaleFactorY));
-                    log.info("Token: [" + word.getText() + "] X= " + word.getBoundingBox().getX() * scaleFactorX + " Y= " + mathUtils.round(word.getBoundingBox().getY()) * scaleFactorY);
+                    tokenList.add(new Token(word.getText(), mathUtils.round(word.getBoundingBox().getX() * scaleFactorX) ,  mathUtils.round(word.getBoundingBox().getY() * scaleFactorY)));
+                    log.info("Token: [" + word.getText() + "] X= " + mathUtils.round(word.getBoundingBox().getX() * scaleFactorX) + " Y= " + mathUtils.round(word.getBoundingBox().getY() * scaleFactorY));
                 }
             });
         }

@@ -67,6 +67,7 @@ public class Controller {
             Optional<File[]> files = Optional.ofNullable(new File("models/" + uuid).listFiles());
             Map<String, List<Token>> allClasses = new HashMap<>();
             files.ifPresent(jsonFiles -> Arrays.stream(jsonFiles).toList().forEach(jsonFile -> allClasses.put(jsonFile.getName(), jsonProcessor.readJsonFile(jsonFile))));
+
             List<Prediction> predictionList = new ArrayList<>();
             if (pdfProcessor.isSearchable(document)) {
                 List<Token> tokenList = pdfProcessor.getTokensFromSearchablePdf(document);
@@ -75,6 +76,7 @@ public class Controller {
                 List<Token> tokenListOcr = pdfProcessor.getTokensFromPdfWithOcr(document);
                 allClasses.forEach((classname, tokenSetClass) -> predictionList.add(classifier.predict(tokenListOcr, classname, tokenSetClass, false)));
             }
+
             document.close();
             log.info("computing time = {} milliseconds", (System.currentTimeMillis() - start));
             return predictionList;
