@@ -34,8 +34,8 @@ public class Classifier {
     public Prediction predict(List<Token> tokenListDocument, String classname, List<Token> tokenListClass, boolean isSearchable){
 
         int distance = getDistanceProfile(isSearchable);
-        Map<Token, Match> foundTokens = new HashMap<>();
-        Set<Token> notFoundTokens = new HashSet<>();
+        Map<Token, Match> foundDocumentToken = new HashMap<>();
+        Set<Token> notFoundClassTokens = new HashSet<>();
         log.info("Start predicting for {}", classname);
         
         tokenListClass.forEach(tokenClass -> {
@@ -49,37 +49,37 @@ public class Classifier {
             });
 
             if(candidateMatches.size()!=0) {
-                modifiedNearestNeighborSearch(candidateMatches, foundTokens, notFoundTokens);
+                modifiedNearestNeighborSearch(candidateMatches, foundDocumentToken, notFoundClassTokens);
             }
             else {
-                notFoundTokens.add(tokenClass);
+                notFoundClassTokens.add(tokenClass);
             }
         });
-        return new Prediction(classname, foundTokens.size(), tokenListClass.size(), foundTokens, notFoundTokens);
+        return new Prediction(classname, foundDocumentToken.size(), tokenListClass.size(), foundDocumentToken, notFoundClassTokens);
     }
 
     /**
      * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
      * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
-     * @param foundTokens       Already found {@link Token} with their distance to a class {@link Token}
+     * @param foundDocumentToken       Already found {@link Token} with their distance to a class {@link Token}
      */
-    private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Map<Token, Match> foundTokens, Set<Token> notFoundToken){
+    private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Map<Token, Match> foundDocumentToken, Set<Token> notFoundToken){
 
         Match nnMatch= candidateMatches.values().stream().min(Comparator.comparing(Match::getDistance)).orElse(null);
 
-        if(foundTokens.containsKey(Objects.requireNonNull(nnMatch).getTokenDocument())){
+        if(foundDocumentToken.containsKey(Objects.requireNonNull(nnMatch).getTokenDocument())){
 
-            double previousEuclideanDistance = foundTokens.get(nnMatch.getTokenDocument()).getDistance();
+            double previousEuclideanDistance = foundDocumentToken.get(nnMatch.getTokenDocument()).getDistance();
             if(previousEuclideanDistance > nnMatch.getDistance()){
 
-                notFoundToken.add(foundTokens.get(nnMatch.getTokenDocument()).getTokenClass());
-                foundTokens.put(nnMatch.getTokenDocument(), nnMatch);
+                notFoundToken.add(foundDocumentToken.get(nnMatch.getTokenDocument()).getTokenClass());
+                foundDocumentToken.put(nnMatch.getTokenDocument(), nnMatch);
             }else{
                 notFoundToken.add(nnMatch.getTokenClass());
             }
         }else{
 
-            foundTokens.put(nnMatch.getTokenDocument(), nnMatch);
+            foundDocumentToken.put(nnMatch.getTokenDocument(), nnMatch);
         }
     }
 
