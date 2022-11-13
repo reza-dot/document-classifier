@@ -13,9 +13,9 @@ import java.util.*;
 @Slf4j
 public class Classifier {
 
-    @Value("${MAX_DISTANCE}")
+    @Value("${max-distance}")
     private int maxDistance;
-    @Value("${MAX_DISTANCE_OCR}")
+    @Value("${max-distance-ocr}")
     private int maxDistanceOcr;
 
     private final MathUtils mathUtils;
@@ -26,10 +26,10 @@ public class Classifier {
 
     /**
      * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
-     * @param tokenListDocument      list of recognized tokens by OCR from the given document
-     * @param classname         The classname of {@tokenListClass}
-     * @param tokenListClass    Included tokens in the class
-     * @return                  Returns {@link Prediction}
+     * @param tokenListDocument     list of recognized tokens by OCR from the given document
+     * @param classname             The classname of {@tokenListClass}
+     * @param tokenListClass        Included tokens in the class
+     * @return                      Returns {@link Prediction}
      */
     public Prediction predict(List<Token> tokenListDocument, String classname, List<Token> tokenListClass, boolean isSearchable){
 
@@ -60,8 +60,8 @@ public class Classifier {
 
     /**
      * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
-     * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
-     * @param foundDocumentToken       Already found {@link Token} with their distance to a class {@link Token}
+     * @param candidateMatches          {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
+     * @param foundDocumentToken        Already found {@link Token} with their distance to a class {@link Token}
      */
     private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Map<Token, Match> foundDocumentToken, Set<Token> notFoundToken){
 

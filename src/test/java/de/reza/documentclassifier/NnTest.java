@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 // Providing high distance in order to get all Tokens from the class.
-@SpringBootTest(properties = { "MAX_DISTANCE=99999999" })
+@SpringBootTest(properties = { "max-distance=99999999" })
 @Slf4j
 public class NnTest {
 
