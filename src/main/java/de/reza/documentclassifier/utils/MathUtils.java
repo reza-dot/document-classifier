@@ -11,12 +11,13 @@ public class MathUtils {
 
     /**
      * Calculates the distance between two points
-     * @param tokenClass    Token of a class
-     * @param token         Token of given pdf document
+     * @param firstToken    Token of a class
+     * @param secondToken   Token of given pdf document
      * @return              distance between two points
      */
-    public double euclideanDistance(Token tokenClass, Token token) {
-        return Math.sqrt((tokenClass.getYAxis() - token.getYAxis()) * (tokenClass.getYAxis()- token.getYAxis()) + (tokenClass.getXAxis() - token.getXAxis()) * (tokenClass.getXAxis()  - token.getXAxis()));
+    public double euclideanDistance(Token firstToken, Token secondToken) {
+        return Math.sqrt((firstToken.getYAxis() - secondToken.getYAxis()) * (firstToken.getYAxis() - secondToken.getYAxis()) +
+                        (firstToken.getXAxis() - secondToken.getXAxis()) * (firstToken.getXAxis()  - secondToken.getXAxis()));
     }
 
     /**
