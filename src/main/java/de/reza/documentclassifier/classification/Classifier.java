@@ -26,10 +26,10 @@ public class Classifier {
 
     /**
      * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
-     * @param tokenListDocument      list of recognized tokens by OCR from the given document
-     * @param classname         The classname of {@tokenListClass}
-     * @param tokenListClass    Included tokens in the class
-     * @return                  Returns {@link Prediction}
+     * @param tokenListDocument         list of recognized tokens by OCR from the given document
+     * @param classname                 The classname of {@tokenListClass}
+     * @param tokenListClass            Included tokens in the class
+     * @return                          Returns {@link Prediction}
      */
     public Prediction predict(List<Token> tokenListDocument, String classname, List<Token> tokenListClass, boolean isSearchable){
 
@@ -59,9 +59,9 @@ public class Classifier {
     }
 
     /**
-     * Application of the algorithm from the bachelor thesis chapter 3.6 'Ermittlung der Tokens'.
-     * @param candidateMatches  {@link Token} which are within a radius with identical {@link Token#getTokenName()} to the class {@link Token}
-     * @param foundDocumentToken       Already found {@link Token} with their distance to a class {@link Token}
+     * Application of the algorithm from the bachelor thesis chapter 3.5 'Ermittlung der Tokens'.
+     * @param candidateMatches          document {@link Token} which are within a radius with identical {@link Token#getTokenName()} to a class {@link Token}
+     * @param foundDocumentToken        found document {@link Token} with corresponding {@link Match}
      */
     private void modifiedNearestNeighborSearch(Map<Token, Match> candidateMatches, Map<Token, Match> foundDocumentToken, Set<Token> notFoundToken){
 
