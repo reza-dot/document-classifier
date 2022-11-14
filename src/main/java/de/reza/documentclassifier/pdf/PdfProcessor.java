@@ -43,30 +43,29 @@ public class PdfProcessor {
     }
 
     /**
-     * Create a list of {@link Token} from a searchable PDF document
+     * Generate a list of {@link Token} from a searchable PDF document
      * @param document      pdf document
      * @return              list of all {@link Token}
-     * @throws IOException  file is not valid
      */
-    public List<Token> getTokensFromSearchablePdf(PDDocument document) throws IOException {
+    public List<Token> getTokensFromSearchablePdf(PDDocument document)  {
 
-        List<Token> tokenListPdf = new ArrayList<>();
+        List<Token> tokenList = new ArrayList<>();
         try {
-            PDFTextStripper stripper = new SearchablePdfUtil(tokenListPdf);
+            PDFTextStripper stripper = new SearchablePdfUtil(tokenList);
             stripper.setSortByPosition(true);
             stripper.setStartPage(0);
             stripper.setEndPage(document.getNumberOfPages());
             Writer dummy = new OutputStreamWriter(new ByteArrayOutputStream());
             stripper.writeText(document, dummy);
             document.close();
-            return tokenListPdf;
+            return tokenList;
         } catch (IOException e) {
             return null;
         }
     }
 
     /**
-     * Performs OCR and create a list of {@Token} from a PDF document
+     * Performs OCR and generate a list of {@Token} from a PDF document
      * @param document      Given document
      * @return              List of {@link Token}
      */
@@ -74,22 +73,20 @@ public class PdfProcessor {
 
         PDFRenderer pdfRenderer = new PDFRenderer(document);
         List<Token> tokenList = new ArrayList<>();
-
         try {
-            for (int page = 0; page < document.getNumberOfPages(); page++) {
+        for (int page = 0; page < document.getNumberOfPages(); page++) {
                 BufferedImage bufferedImage = pdfRenderer.renderImageWithDPI(page, dpi, ImageType.RGB);
                 tesseractConfig.getInstance().getWords(bufferedImage, ITessAPI.TessPageIteratorLevel.RIL_WORD).forEach(word -> {
                     // tess4j recognize for some reason whitespaces as words. Seems to be a bug.
-                    if (!word.getText().equals(" ")) {
-                        tokenList.add(new Token(word.getText(), mathUtils.round(word.getBoundingBox().getX() * scaleFactorX), mathUtils.round(word.getBoundingBox().getY() * scaleFactorY)));
+                    if(!word.getText().equals(" ")) {
+                        tokenList.add(new Token(word.getText(), mathUtils.round(word.getBoundingBox().getX() * scaleFactorX) ,  mathUtils.round(word.getBoundingBox().getY() * scaleFactorY)));
                         log.info("Token: [" + word.getText() + "] X= " + mathUtils.round(word.getBoundingBox().getX() * scaleFactorX) + " Y= " + mathUtils.round(word.getBoundingBox().getY() * scaleFactorY));
                     }
                 });
             }
             return tokenList;
         } catch (IOException e) {
-            log.info("ocr procedure could not be performed for");
-            throw new RuntimeException(e);
+            return null;
         }
     }
 
