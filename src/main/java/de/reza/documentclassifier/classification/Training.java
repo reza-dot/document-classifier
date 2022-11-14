@@ -28,8 +28,8 @@ public class Training {
     /**
      * Recognizes tokens with their corresponding coordinates on a searchable PDF document.
      * Saves this in the next step as a JSON file in the model
-     * @param pathToTrainingFiles   PDF documents
-     * @param uuid                  Identification number for a model
+     * @param pathToTrainingFiles   path to the PDF documents
+     * @param uuid                  {@link UUID} for a model
      */
     public void startTraining(String pathToTrainingFiles, String uuid){
 

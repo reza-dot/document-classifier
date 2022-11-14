@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Includes the classification of the document for a given class
  * The attributes {@link Prediction#foundDocumentTokens} and {@link Prediction#notFoundClassTokens}
- * attributes can be commented out in order to obtain this information in the JSON response.
+ * can be commented out in order to obtain this information in the JSON response.
  */
 @Getter
 @ToString
@@ -39,7 +39,7 @@ public final class Prediction {
     private final double probability;
 
     /**
-     * All found tokens within the document, which match the tokens from the class.
+     * All found {@link Token} within the document with corresponding {@link Match}
      */
     @JsonIgnore
     private final Map<Token, Match> foundDocumentTokens;

@@ -15,7 +15,7 @@ public final class Match {
     private Token tokenDocument;
 
     /**
-     * A {@link Token} of a token class
+     * A {@link Token} of a class
      */
     private Token tokenClass;
 
