@@ -6,6 +6,7 @@ and layout.
 ## Description
 
 Hybrid approach of a machine learning and rule-based system for training and classifying structured PDF documents.
+A complete description of the implementation can be found in the bachelor thesis.
 
 ## Getting Started
 
@@ -16,18 +17,18 @@ Hybrid approach of a machine learning and rule-based system for training and cla
 * Docker (if you want to start the app inside a docker container)
 
 ### Build from source
-Execute the following command in the project folder
+Execute the following command inside the project folder
 ```
 mvn package
 ```
-### Run in docker
-If you want to start the webservice in the docker container execute the following command in the solution
-```
-docker compose up
-```
-### Executing program (local)
+### Executing program (locally)
 ```
 java -jar document-classifier-<VERSION>.jar
+```
+### Run in docker
+Execute the following command inside the project folder to run the web service inside a docker container
+```
+docker compose up
 ```
 
 ## Authors
@@ -42,7 +43,7 @@ Contributors names and contact info
 
 ## License
 
-This project is licensed under the [APACHE LICENSE, VERSION 2.0](https://www.apache.org/licenses/LICENSE-2.0) License - see the LICENSE.md file for details
+This project is licensed under the [APACHE LICENSE, VERSION 2.0](LICENSE)
 
 ## Acknowledgments
 
