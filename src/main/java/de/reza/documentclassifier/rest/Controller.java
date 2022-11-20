@@ -58,7 +58,7 @@ public class Controller {
      * @return         {@link List<Prediction>}
      */
     @GetMapping("/api/predict/{uuid}")
-    public List<Prediction> predict(@PathVariable("uuid") @NonNull String uuid, @RequestParam("document") @NonNull MultipartFile file)  {
+    public List<Prediction> predict(@PathVariable("uuid") @NonNull String uuid, @RequestParam("document") @NonNull MultipartFile file, @RequestParam("highest") Optional<Boolean> highestPrediction) {
 
         try
         {
@@ -79,9 +79,20 @@ public class Controller {
 
             document.close();
             log.info("computing time = {} milliseconds", (System.currentTimeMillis() - start));
-            return predictionList;
+            return highestPrediction.isPresent() ? Collections.singletonList(getHighestProbability(predictionList)) : predictionList;
         } catch (IOException e) {
             throw new RuntimeException("Not supported filetype or no file provided");
         }
+    }
+
+    /**
+     * Get {@link Prediction} with highest {@link Prediction#getProbability()}
+     * @param predictionList    List of {@link Prediction}
+     * @return                  return {@link Prediction}
+     */
+    public Prediction getHighestProbability(List<Prediction> predictionList){
+
+        Optional<Prediction> highestPrediction = Optional.of(predictionList.stream().max(Comparator.comparing(Prediction::getProbability)).get());
+        return highestPrediction.get().getProbability() != 0 ? highestPrediction.get() : null;
     }
 }
