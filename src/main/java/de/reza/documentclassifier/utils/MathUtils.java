@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+/**
+ * Mathematical functions which are used in the classes
+ */
 @Service
 public class MathUtils {
 

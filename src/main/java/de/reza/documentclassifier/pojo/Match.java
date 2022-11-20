@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 
+/**
+ * A match between a document {@link Token} and a class {@link Token} and their distance to each other.
+ */
 @Getter
 @AllArgsConstructor
 @ToString

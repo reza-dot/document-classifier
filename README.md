@@ -12,7 +12,7 @@ A complete description of the implementation can be found in the bachelor thesis
 
 ### Dependencies
 
-* JDK 17
+* Java 17
 * Apache Maven 3.8.5 (If you want to build from source)
 * Docker (if you want to start the app inside a docker container)
 
@@ -21,7 +21,7 @@ Execute the following command inside the project folder
 ```
 mvn package
 ```
-### Executing program (locally)
+### Executing program
 ```
 java -jar document-classifier-<VERSION>.jar
 ```
@@ -38,7 +38,7 @@ Contributors names and contact info
 
 ## Version History
 
-* 0.1
+* 1.0
     * Initial Release
 
 ## License

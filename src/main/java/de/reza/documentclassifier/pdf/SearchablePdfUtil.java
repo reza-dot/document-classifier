@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Specifies how PDFBox extracts text from documents.
+ */
 @Slf4j
 @Component
 public class SearchablePdfUtil extends PDFTextStripper {
@@ -28,7 +30,7 @@ public class SearchablePdfUtil extends PDFTextStripper {
     /**
      * Overriding writeString in order to get segmented words (tokens) instead of the whole text from pdf
      * modified code from
-     * <a href="https://github.com/mkl-public/testarea-pdfbox2/blob/master/src/test/java/mkl/testarea/pdfbox2/extract/ExtractWordCoordinates.java">...</a>
+     * <a href="https://github.com/mkl-public/testarea-pdfbox2/blob/master/src/test/java/mkl/testarea/pdfbox2/extract/ExtractWordCoordinates.java">mkl</a>
      * @author mkl
      * @param string            Write a Java string to the output stream
      * @param textPositions     This represents a string and a position on the screen of those characters
@@ -54,6 +56,9 @@ public class SearchablePdfUtil extends PDFTextStripper {
 
     /**
      * Creates a bounding box around the segmented word. Creates an {@link Token} with the segmented word, the X-axis and Y-axis. Adds the {@link Token} to the referenced token list.
+     * modified code from
+     * <a href="https://github.com/mkl-public/testarea-pdfbox2/blob/master/src/test/java/mkl/testarea/pdfbox2/extract/ExtractWordCoordinates.java">mkl</a>
+     * @author mkl
      * @param word      This represents a string and a position on the screen of those characters
      */
     void getTokenBoundingBox(List<TextPosition> word) {
