@@ -16,6 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Processes incoming HTTP requests
+ */
 @RestController
 @Slf4j
 public class Controller {

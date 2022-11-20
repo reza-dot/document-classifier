@@ -10,6 +10,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Map a list of {@link Token} between Java and JSON objects
+ */
 @Service
 @Slf4j
 public class JsonProcessor {

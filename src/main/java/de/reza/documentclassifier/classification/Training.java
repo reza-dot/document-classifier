@@ -12,6 +12,9 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * Processes PDF training documents into classes (JSON files)
+ */
 @Component
 @Slf4j
 public class Training {

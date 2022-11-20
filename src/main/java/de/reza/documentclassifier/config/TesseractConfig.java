@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 
+/**
+ * Initialized Tesseract-OCR engine
+ */
 @Configuration
 @Getter
 @Slf4j
@@ -25,7 +28,7 @@ public class TesseractConfig {
     private String model;
 
     /**
-     * Initializes a tesseract-ocr engine with defined configurations
+     * Initializes a Tesseract-OCR engine with defined configurations
      */
     @Bean
     public Tesseract getInstance() {

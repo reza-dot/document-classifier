@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Processes PDF documents in order to get {@link Token}
+ */
 @Component
 @Slf4j
 public class PdfProcessor {

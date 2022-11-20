@@ -75,6 +75,7 @@ public class NnTest {
 
         // Euclidean distance between the correct token from the list and the token from the pdf is about 1.67
         double distance = mathUtils.round(mathUtils.euclideanDistance(tokenFromPrediction, new Token("Artikel-Nr.:", 355.0, 386.4)));
+        assertEquals("Artikel-Nr.:" ,tokenFromPrediction.getTokenName());
         assertEquals(1.67, distance);
     }
 }

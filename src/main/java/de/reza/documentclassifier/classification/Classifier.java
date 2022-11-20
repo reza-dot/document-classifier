@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.util.*;
 
+/**
+ * Creates {@link Prediction} for a PDF-document
+ */
 @Component
 @Slf4j
 public class Classifier {

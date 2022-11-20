@@ -25,8 +25,8 @@ RUN ldconfig
 WORKDIR /app
 
 EXPOSE 8080
-COPY --from=build /app/target/document-classifier-0.0.1-SNAPSHOT.jar ./
-ENTRYPOINT [ "java", "-jar", "document-classifier-0.0.1-SNAPSHOT.jar" ]
+COPY --from=build /app/target/document-classifier-1.0.jar ./
+ENTRYPOINT [ "java", "-jar", "document-classifier-1.0.jar" ]
 
 
 
