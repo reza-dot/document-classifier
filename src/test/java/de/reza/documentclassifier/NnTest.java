@@ -55,7 +55,7 @@ public class NnTest {
         assertEquals(1, prediction.getFoundDocumentTokens().size());
         log.info("Found tokens {}", prediction.getFoundDocumentTokens());
 
-        // Assert that 4 tokens are not found
+        // Assert that 6 tokens are not found
         assertEquals(6, prediction.getNotFoundClassTokens().size());
         log.info("Not Found tokens {}", prediction.getNotFoundClassTokens());
 
