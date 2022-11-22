@@ -26,7 +26,7 @@ public final class Prediction {
     /**
      * The found {@link Token} within a class
      */
-    private final int numberOfFoundTokensInPdf;
+    private final int numberOfFoundTokensInDocument;
 
     /**
      * The number of {@link Token} a class has
@@ -34,7 +34,7 @@ public final class Prediction {
     private final int numberOfTokensInClass;
 
     /**
-     * The relative frequency from {@link #numberOfFoundTokensInPdf} / {@link #numberOfTokensInClass}
+     * The relative frequency from {@link #numberOfFoundTokensInDocument} / {@link #numberOfTokensInClass}
      */
     private final double probability;
 
@@ -54,11 +54,11 @@ public final class Prediction {
     @Getter(AccessLevel.NONE)
     private final MathUtils mathUtils = new MathUtils();
 
-    public Prediction(String classname, int numberOfFoundTokensInPdf, int numberOfTokensInClass, Map<Token, Match>  foundDocumentTokens, Set<Token> notFoundClassTokens){
+    public Prediction(String classname, int numberOfFoundTokensInDocument , int numberOfTokensInClass, Map<Token, Match>  foundDocumentTokens, Set<Token> notFoundClassTokens){
         this.classname = classname.split("\\.")[0];
-        this.numberOfFoundTokensInPdf = numberOfFoundTokensInPdf;
+        this.numberOfFoundTokensInDocument = numberOfFoundTokensInDocument ;
         this.numberOfTokensInClass = numberOfTokensInClass;
-        this.probability =  mathUtils.round((double) numberOfFoundTokensInPdf /(double) numberOfTokensInClass);
+        this.probability =  mathUtils.round((double) numberOfFoundTokensInDocument  /(double) numberOfTokensInClass);
         this.foundDocumentTokens = foundDocumentTokens;
         this.notFoundClassTokens = notFoundClassTokens;
     }

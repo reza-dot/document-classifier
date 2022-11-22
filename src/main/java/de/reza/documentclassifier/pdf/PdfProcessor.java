@@ -46,7 +46,7 @@ public class PdfProcessor {
     }
 
     /**
-     * Generate a list of {@link Token} from a searchable PDF document
+     * Create a list of {@link Token} from a searchable PDF document
      * @param document      pdf document
      * @return              list of all {@link Token}
      */
@@ -68,7 +68,7 @@ public class PdfProcessor {
     }
 
     /**
-     * Performs OCR and generate a list of {@Token} from a PDF document
+     * Performs OCR and create a list of {@Token} from a PDF document
      * @param document      Given document
      * @return              List of {@link Token}
      */
