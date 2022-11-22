@@ -1,7 +1,5 @@
 package de.reza.documentclassifier.config;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITessAPI;
 import net.sourceforge.tess4j.Tesseract;
@@ -16,14 +14,12 @@ import java.io.File;
  * Initialized Tesseract-OCR engine
  */
 @Configuration
-@Getter
 @Slf4j
 public class TesseractConfig {
 
-    @Getter(AccessLevel.NONE)
     @Value("${DPI}")
     private int dpi;
-    @Getter(AccessLevel.NONE)
+
     @Value("${ocr.model}")
     private String model;
 
